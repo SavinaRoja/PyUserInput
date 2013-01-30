@@ -16,7 +16,13 @@
 """The goal of PyMouse is to have a cross-platform way to control the mouse.
 PyMouse should work on Windows, Mac and any Unix that has xlib.
 
-See http://github.com/pepijndevos/PyMouse for more information.
+PyMouse is a part of PyUserInput, along with PyKeyboard, for more information
+about this project, see:
+http://github.com/SavinaRoja/PyUserInput
+
+PyMouse was originally developed by Pepijn de Vos. For the original repository,
+see:
+https://github.com/pepijndevos/PyMouse
 """
 
 import sys
