@@ -15,16 +15,11 @@
 
 """
 The goal of PyKeyboard is to provide a cross-platform way to control the
-keyboard. It is intended to be complementary to the PyMouse module by
-pepijndevos and should work on the same dependencies.
+keyboard.
 
-PyKeyboard should work on Windows, Mac, and X11 systems.
-
-For more information about PyKeyboard, see:
-See http://github.com/SavinaRoja/PyKeyboard
-
-And for PyMouse:
-See http://github.com/pepijndevos/PyMouse
+PyKeyboard is a part of PyUserInput, along with PyMouse, for more information
+about this project, see:
+http://github.com/SavinaRoja/PyUserInput
 """
 
 import sys
