@@ -39,18 +39,27 @@ class PyKeyboard(PyKeyboardMeta):
         char_vk = win32api.VkKeyScan(character)
         win32api.keybd_event(char_vk, 0, win32com.KEYEVENTF_KEYUP, 0)
 
-    def tap_key(self, character='', repeat=1):
+    def tap_key(self, character='', repeat=1, char_interval=0):
         """
         Press and release a given character key repeat=n times.
         """
         for i in xrange(repeat):
             self.press_key(character)
             self.release_key(character)
+            time.sleep(char_interval)
 
     def type_string(self, char_string, char_interval=0):
         """
         A convenience method for typing longer strings of characters.
         """
         for i in char_string:
-            time.sleep(char_interval)
             self.tap_key(i)
+            time.sleep(char_interval)
+
+    def is_char_shifted(self, character):
+        """Returns True if the key character is uppercase or shifted."""
+        if character.isupper():
+            return True
+        if character in '<>?:"{}|~!@#$%^&*()_+':
+            return True
+        return False

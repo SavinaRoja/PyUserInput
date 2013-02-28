@@ -259,7 +259,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
             self.display2.screen().root.grab_keyboard(True, X.KeyPressMask | X.KeyReleaseMask, X.GrabModeAsync, X.GrabModeAsync, 0, 0, X.CurrentTime)
 
         self.display2.record_enable_context(self.ctx, self.handler)
-        self.display2.record_free_context(self.ctx)    
+        self.display2.record_free_context(self.ctx)
 
     def stop(self):
         """Stop listening for keyboard input events."""
