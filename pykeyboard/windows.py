@@ -26,15 +26,31 @@ class PyKeyboard(PyKeyboardMeta):
         PyKeyboardMeta.__init__(self)
 
     def press_key(self, character=''):
-        win32api.keybd_event(win32com.WM_KEYDOWN)
+        """
+        Press a given character key.
+        """
+        char_vk = win32api.VkKeyScan(character)
+        win32api.keybd_event(char_vk, 0, 0, 0)
 
     def release_key(self, character=''):
-        win32api.keybd_event(win32com.WM_KEYUP)
+        """
+        Release a given character key.
+        """
+        char_vk = win32api.VkKeyScan(character)
+        win32api.keybd_event(char_vk, 0, win32com.KEYEVENTF_KEYUP, 0)
 
     def tap_key(self, character='', repeat=1):
         """
-        Press and release a given character key n times.
+        Press and release a given character key repeat=n times.
         """
         for i in xrange(repeat):
             self.press_key(character)
             self.release_key(character)
+
+    def type_string(self, char_string, char_interval=0):
+        """
+        A convenience method for typing longer strings of characters.
+        """
+        for i in char_string:
+            time.sleep(char_interval)
+            self.tap_key(i)
