@@ -14,7 +14,7 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from ctypes import *
-import win32api,win32con
+import win32api, win32con
 from base import PyMouseMeta, PyMouseEventMeta
 import pythoncom, pyHook
 from time import sleep
