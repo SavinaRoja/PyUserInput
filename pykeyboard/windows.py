@@ -12,3 +12,29 @@
 #
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+import win32api, win32con
+
+import time
+
+class PyKeyboard(PyKeyboardMeta):
+    """
+    The PyKeyboard implementation for Windows systems. This allows one to
+    simulate keyboard input.
+    """
+    def __init__(self):
+        PyKeyboardMeta.__init__(self)
+
+    def press_key(self, character=''):
+        win32api.keybd_event(win32com.WM_KEYDOWN)
+
+    def release_key(self, character=''):
+        win32api.keybd_event(win32com.WM_KEYUP)
+
+    def tap_key(self, character='', repeat=1):
+        """
+        Press and release a given character key n times.
+        """
+        for i in xrange(repeat):
+            self.press_key(character)
+            self.release_key(character)
