@@ -42,7 +42,7 @@ class PyKeyboard(PyKeyboardMeta):
     """
     def __init__(self):
         PyKeyboardMeta.__init__(self)
-        self.special_key_assignment(self)
+        self.special_key_assignment()
 
     def press_key(self, character=''):
         """
