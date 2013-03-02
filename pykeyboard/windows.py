@@ -51,7 +51,7 @@ class PyKeyboard(PyKeyboardMeta):
         try:
             shifted = self.is_char_shifted(character)
         except AttributeError:
-            raise(AttributeError('WTF'))
+            win32api.keybd_event(character, 0, 0, 0)
         else:
             if shifted:
                 win32api.keybd_event(self.shift_key, 0, 0, 0)
@@ -65,12 +65,12 @@ class PyKeyboard(PyKeyboardMeta):
         try:
             shifted = self.is_char_shifted(character)
         except AttributeError:
-            raise(AttributeError('WTF'))
+            win32api.keybd_event(character, 0, KEYEVENTF_KEYUP, 0)
         else:
             if shifted:
                 win32api.keybd_event(self.shift_key, 0, KEYEVENTF_KEYUP, 0)
                 char_vk = win32api.VkKeyScan(character)
-                win32api.keybd_event(char_vk, 0, win32com.KEYEVENTF_KEYUP, 0)
+                win32api.keybd_event(char_vk, 0, KEYEVENTF_KEYUP, 0)
 
     def tap_key(self, character='', repeat=1, char_interval=0):
         """
@@ -162,7 +162,6 @@ class PyKeyboard(PyKeyboardMeta):
         self.windows_r_key = VK_RWIN
         self.super_r_key = self.windows_r_key
         self.apps_key = VK_APPS
-        self.sleep_key = VK_SLEEP
         #Numpad
         self.keypad_keys = {'Space': None,
                             'Tab': None,
