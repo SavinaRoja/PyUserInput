@@ -20,7 +20,7 @@ from Xlib.XK import string_to_keysym, keysym_to_string
 from Xlib.ext import record
 from Xlib.protocol import rq
 
-from base import PyKeyboardMeta, PyKeyboardEventMeta
+from .base import PyKeyboardMeta, PyKeyboardEventMeta
 
 import time
 

@@ -17,6 +17,8 @@ from ctypes import *
 import win32api
 from win32con import *
 
+from .base import PyKeyboardMeta, PyKeyboardEventMeta
+
 import time
 
 #A reference for me to keep the windows docs straight:
@@ -40,6 +42,7 @@ class PyKeyboard(PyKeyboardMeta):
     """
     def __init__(self):
         PyKeyboardMeta.__init__(self)
+        self.special_key_assignment(self)
 
     def press_key(self, character=''):
         """
@@ -73,7 +76,7 @@ class PyKeyboard(PyKeyboardMeta):
         """
         Press and release a given character key repeat=n times.
         """
-        for i in xrange(repeat):
+        for i in range(repeat):
             self.press_key(character)
             self.release_key(character)
             time.sleep(char_interval)
@@ -94,7 +97,7 @@ class PyKeyboard(PyKeyboardMeta):
             return True
         return False
 
-def special_key_assignment(self):
+    def special_key_assignment(self):
         """
         Special Key assignment for windows
         """

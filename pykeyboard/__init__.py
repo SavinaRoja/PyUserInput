@@ -25,13 +25,13 @@ http://github.com/SavinaRoja/PyUserInput
 import sys
 
 if sys.platform.startswith('java'):
-    from java_ import PyKeyboard
+    from .java_ import PyKeyboard
 
 elif sys.platform == 'darwin':
-    from mac import PyKeyboard, PyKeyboardEvent
+    from .mac import PyKeyboard, PyKeyboardEvent
 
 elif sys.platform == 'win32':
-    from windows import PyKeyboard, PyKeyboardEvent
+    from .windows import PyKeyboard, PyKeyboardEvent
 
 else:
-    from x11 import PyKeyboard, PyKeyboardEvent
+    from .x11 import PyKeyboard, PyKeyboardEvent
