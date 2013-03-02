@@ -166,11 +166,14 @@ class PyKeyboard(PyKeyboardMeta):
         self.control_r_key = self.lookup_character_value('Control_R')
         self.control_key = self.control_l_key  # Default Ctrl is left Ctrl
         self.caps_lock_key = self.lookup_character_value('Caps_Lock')
+        self.capital_key = self.caps_lock_key  # Some may know it as Capital
         self.shift_lock_key = self.lookup_character_value('Shift_Lock')
         self.meta_l_key = self.lookup_character_value('Meta_L')
         self.meta_r_key = self.lookup_character_value('Meta_R')
         self.super_l_key = self.lookup_character_value('Super_L')
+        self.windows_l_key = self.super_l_key  # Cross-support; also it's printed there
         self.super_r_key = self.lookup_character_value('Super_R')
+        self.windows_r_key = self.super_r_key  # Cross-support; also it's printed there
         self.hyper_l_key = self.lookup_character_value('Hyper_L')
         self.hyper_r_key = self.lookup_character_value('Hyper_R')
         #Cursor Control and Motion
@@ -188,11 +191,14 @@ class PyKeyboard(PyKeyboardMeta):
         #Misc Functions
         self.select_key = self.lookup_character_value('Select')
         self.print_key = self.lookup_character_value('Print')
+        self.print_screen_key = self.print_key  # Seems to be the same thing
+        self.snapshot_key = self.print_key  # Another name for printscreen
         self.execute_key = self.lookup_character_value('Execute') 
         self.insert_key = self.lookup_character_value('Insert')
         self.undo_key = self.lookup_character_value('Undo')
         self.redo_key = self.lookup_character_value('Redo')
         self.menu_key = self.lookup_character_value('Menu')
+        self.apps_key = self.menu_key  # Windows...
         self.find_key = self.lookup_character_value('Find')
         self.cancel_key = self.lookup_character_value('Cancel')
         self.help_key = self.lookup_character_value('Help')
@@ -215,6 +221,20 @@ class PyKeyboard(PyKeyboardMeta):
         self.l_keys = [None] + [self.lookup_character_value('L'+str(i)) for i in xrange(1,11)]
         #RKeys
         self.r_keys = [None] + [self.lookup_character_value('R'+str(i)) for i in xrange(1,16)]
+        
+        #Unsupported keys from windows
+        self.kana_key = None
+        self.hangeul_key = None # old name - should be here for compatibility
+        self.hangul_key = None
+        self.junjua_key = None
+        self.final_key = None
+        self.hanja_key = None
+        self.kanji_key = None
+        self.convert_key = None
+        self.nonconvert_key = None
+        self.accept_key = None
+        self.modechange_key = None
+        self.sleep_key = None
 
     def lookup_character_value(self, character):
         """
