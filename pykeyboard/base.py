@@ -76,15 +76,15 @@ class PyKeyboardEventMeta(Thread):
         self.state = False
 
     def handler(self):
-        pass
+        raise NotImplementedError
 
     def key_press(self, key):
         """Subclass this method with your key press event handler."""
-        pass
+        raise NotImplementedError
 
     def key_release(self, key):
         """Subclass this method with your key release event handler."""
-        pass
+        raise NotImplementedError
 
     def escape_code(self):
         """
