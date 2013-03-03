@@ -45,12 +45,12 @@ class PyKeyboard(PyKeyboardMeta):
         try:
             shifted = self.is_char_shifted(character)
         except AttributeError:
-            win32api.keybd_event(character, 0, 0, 0)
+            win32api.keybd_event(character, 0, KEYEVENTF_SILENT, 0)
         else:
             if shifted:
                 win32api.keybd_event(self.shift_key, 0, 0, 0)
             char_vk = win32api.VkKeyScan(character)
-            win32api.keybd_event(char_vk, 0, 0, 0)
+            win32api.keybd_event(char_vk, 0, KEYEVENTF_SILENT, 0)
 
     def release_key(self, character=''):
         """
@@ -59,12 +59,12 @@ class PyKeyboard(PyKeyboardMeta):
         try:
             shifted = self.is_char_shifted(character)
         except AttributeError:
-            win32api.keybd_event(character, 0, KEYEVENTF_KEYUP, 0)
+            win32api.keybd_event(character, 0, KEYEVENTF_SILENT|KEYEVENTF_KEYUP, 0)
         else:
             if shifted:
-                win32api.keybd_event(self.shift_key, 0, KEYEVENTF_KEYUP, 0)
+                win32api.keybd_event(self.shift_key, 0, KEYEVENTF_SILENT|KEYEVENTF_KEYUP, 0)
                 char_vk = win32api.VkKeyScan(character)
-                win32api.keybd_event(char_vk, 0, KEYEVENTF_KEYUP, 0)
+                win32api.keybd_event(char_vk, 0, KEYEVENTF_SILENT|KEYEVENTF_KEYUP, 0)
 
     def tap_key(self, character='', repeat=1, char_interval=0):
         """
