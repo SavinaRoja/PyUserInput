@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(name='PyUserInput',
       version='0.1',
       description='A module for cross-platform control of the mouse and keyboard in python that is simple to use',
-      long_description = 
+      long_description = '''''',
       author='Paul Barton',
       author_email='pablo.barton@gmail.com',
       url='https://github.com/SavinaRoja/PyUserInput',
