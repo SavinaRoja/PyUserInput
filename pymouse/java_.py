@@ -16,7 +16,7 @@
 from java.awt import Robot, Toolkit
 from java.awt.event import InputEvent
 from java.awt.MouseInfo import getPointerInfo
-from base import PyMouseMeta
+from .base import PyMouseMeta
 
 r = Robot()
 

@@ -21,12 +21,6 @@ from .base import PyKeyboardMeta, PyKeyboardEventMeta
 
 import time
 
-#A reference for me to keep the windows docs straight:
-#LONG = ctypes.c_long
-#WORD = ctypes.c_ushort
-#DWORD = ctypes.c_ulong
-#ULONG_PTR = ctypes.POINTER(DWORD)
-
 class SupportError(Exception):
     """For keys not supported on this system"""
     def __init__(self, value):

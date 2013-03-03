@@ -15,7 +15,7 @@
 
 from ctypes import *
 import win32api, win32con
-from base import PyMouseMeta, PyMouseEventMeta
+from .base import PyMouseMeta, PyMouseEventMeta
 import pythoncom, pyHook
 from time import sleep
 
