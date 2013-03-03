@@ -45,12 +45,12 @@ class PyKeyboard(PyKeyboardMeta):
         try:
             shifted = self.is_char_shifted(character)
         except AttributeError:
-            win32api.keybd_event(character, 0, KEYEVENTF_SILENT, 0)
+            win32api.keybd_event(character, 0, 0, 0)
         else:
             if shifted:
                 win32api.keybd_event(self.shift_key, 0, 0, 0)
             char_vk = win32api.VkKeyScan(character)
-            win32api.keybd_event(char_vk, 0, KEYEVENTF_SILENT, 0)
+            win32api.keybd_event(char_vk, 0, 0, 0)
 
     def release_key(self, character=''):
         """
@@ -59,12 +59,12 @@ class PyKeyboard(PyKeyboardMeta):
         try:
             shifted = self.is_char_shifted(character)
         except AttributeError:
-            win32api.keybd_event(character, 0, KEYEVENTF_SILENT|KEYEVENTF_KEYUP, 0)
+            win32api.keybd_event(character, 0, KEYEVENTF_KEYUP, 0)
         else:
             if shifted:
-                win32api.keybd_event(self.shift_key, 0, KEYEVENTF_SILENT|KEYEVENTF_KEYUP, 0)
-                char_vk = win32api.VkKeyScan(character)
-                win32api.keybd_event(char_vk, 0, KEYEVENTF_SILENT|KEYEVENTF_KEYUP, 0)
+                win32api.keybd_event(self.shift_key, 0, KEYEVENTF_KEYUP, 0)
+            char_vk = win32api.VkKeyScan(character)
+            win32api.keybd_event(char_vk, 0, KEYEVENTF_KEYUP, 0)
 
     def tap_key(self, character='', repeat=1, char_interval=0):
         """
@@ -224,10 +224,12 @@ class PyKeyboard(PyKeyboardMeta):
         self.media_next_track_key = VK_MEDIA_NEXT_TRACK
         self.media_prev_track_key = VK_MEDIA_PREV_TRACK
         self.media_play_pause_key = VK_MEDIA_PLAY_PAUSE
+        self.begin_key = self.home_key
         #LKeys - Unsupported
         self.l_keys = [None] * 11
         #RKeys - Unsupported
         self.r_keys = [None] * 16
+
         #Other unsupported Keys from X11
         self.linefeed_key = None
         self.find_key = None
@@ -238,7 +240,6 @@ class PyKeyboard(PyKeyboardMeta):
         self.hyper_r_key = None
         self.undo_key = None
         self.redo_key = None
-        self.begin_key = None
         self.script_switch_key = None
 
 class PyKeyboardEvent(PyKeyboardEventMeta):

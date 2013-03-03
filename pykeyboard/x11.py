@@ -221,7 +221,7 @@ class PyKeyboard(PyKeyboardMeta):
         self.l_keys = [None] + [self.lookup_character_value('L'+str(i)) for i in xrange(1,11)]
         #RKeys
         self.r_keys = [None] + [self.lookup_character_value('R'+str(i)) for i in xrange(1,16)]
-        
+
         #Unsupported keys from windows
         self.kana_key = None
         self.hangeul_key = None # old name - should be here for compatibility
@@ -235,6 +235,7 @@ class PyKeyboard(PyKeyboardMeta):
         self.accept_key = None
         self.modechange_key = None
         self.sleep_key = None
+        
 
     def lookup_character_value(self, character):
         """
