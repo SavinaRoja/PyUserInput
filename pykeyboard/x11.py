@@ -373,7 +373,6 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
             self.shift_state = 0
         else:
             return False
-        print('Shift State Toggled!')
         return True
 
     def toggle_alt_state(self):
@@ -384,5 +383,4 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
             self.shift_state = 0
         else:
             return False
-        print('Alt State Toggled!')
         return True
