@@ -16,6 +16,7 @@
 from ctypes import *
 import win32api
 from win32con import *
+import pythoncom, pyHook
 
 from .base import PyKeyboardMeta, PyKeyboardEventMeta
 
@@ -244,7 +245,60 @@ class PyKeyboard(PyKeyboardMeta):
 
 class PyKeyboardEvent(PyKeyboardEventMeta):
     """
-    The PyKeyboard implementation for Windows Systems
+    The PyKeyboardEvent implementation for Windows Systems. This allows one
+    to listen for keyboard input.
     """
-    def __init__(self, display=None):
-        pass
+    def __init__(self):
+        PyKeyboardEventMeta.__init__(self)
+        self.hm = pyHook.HookManager()
+        self.shift_state = 0  # 0 is off, 1 is on
+        self.alt_state = 0  # 0 is off, 2 is on
+
+    def run(self):
+        """Begin listening for keyboard input events."""
+        self.state = True
+        self.hm.KeyAll = self.handler
+        self.hm.HookKeyboard()
+        while self.state:
+            sleep(0.01)
+            pythoncom.PumpWaitingMessages()
+
+    def stop(self):
+        """Stop listening for keyboard input events."""
+        self.hm.UnhookKeyboard()
+        self.state = False
+
+    def handler(self, reply):
+        """Upper level handler of keyboard events."""
+        if reply.Message == pyHook.HookConstants.WM_KEYDOWN:
+            self.key_press(reply)
+        elif reply.Message == pyHook.HookConstants.WM_KEYUP:
+            self.key_release(reply)
+        else:
+            print('Keyboard event message unhandled: {0}'.format(reply.Message))
+        #return not self.capture
+
+    def key_press(self, event):
+        print('Key Pressed!')
+        print('GetKey: {0}'.format(event.GetKey()))  # Name of the virtual keycode, str
+        print('IsAlt: {0}'.format(event.IsAlt()))  # Was the alt key depressed?, bool
+        print('IsExtended: {0}'.format(event.IsExtended()))  # Is this an extended key?, bool
+        print('IsInjected: {0}'.format(event.IsInjected()))  # Was this event generated programmatically?, bool
+        print('IsTransition: {0}'.format(event.IsTransition()))  #Is this a transition from up to down or vice versa?, bool
+        print('ASCII: {0}'.format(event.Ascii))  # ASCII value, if one exists, str
+        print('KeyID: {0}'.format(event.KeyID))  # Virtual key code, int
+        print('ScanCode: {0}'.format(event.ScanCode))  # Scan code, int
+
+    def key_release(self, event):
+        print('Key Released!')
+        print('GetKey: {0}'.format(event.GetKey()))  # Name of the virtual keycode, str
+        print('IsAlt: {0}'.format(event.IsAlt()))  # Was the alt key depressed?, bool
+        print('IsExtended: {0}'.format(event.IsExtended()))  # Is this an extended key?, bool
+        print('IsInjected: {0}'.format(event.IsInjected()))  # Was this event generated programmatically?, bool
+        print('IsTransition: {0}'.format(event.IsTransition()))  #Is this a transition from up to down or vice versa?, bool
+        print('ASCII: {0}'.format(event.Ascii))  # ASCII value, if one exists, str
+        print('KeyID: {0}'.format(event.KeyID))  # Virtual key code, int
+        print('ScanCode: {0}'.format(event.ScanCode))  # Scan code, int
+
+    def escape_code(self):
+        return VK_ESCAPE
