@@ -57,6 +57,7 @@ class PyMouseEvent(PyMouseEventMeta):
     def run(self):
         self.hm.MouseAllButtons = self._click
         self.hm.MouseMove = self._move
+        #I think I can add scrollwheel support at some point
         self.hm.HookMouse()
         while self.state:
             sleep(0.01)
