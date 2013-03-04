@@ -311,10 +311,10 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
     def key_press(self, keycode):
         """A key has been pressed, do stuff."""
         #Alter modification states
-        if keycode in self.mod_keycodes['Shift']:
-            self.shift_state = 1
+        if keycode in self.mod_keycodes['Shift'] or keycode in self.mod_keycodes['Lock']:
+            self.toggle_shift_state()
         elif keycode in self.mod_keycodes['Alt']:
-            self.alt_state = 2
+            self.toggle_alt_state()
         else:
             pass
 
@@ -322,9 +322,9 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         """A key has been released, do stuff."""
         #Alter modification states
         if keycode in self.mod_keycodes['Shift']:
-            self.shift_state = 0
+            self.toggle_shift_state()
         elif keycode in self.mod_keycodes['Alt']:
-            self.alt_state = 0
+            self.toggle_alt_state()
         else:
             pass
 
@@ -365,3 +365,24 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
             ch_keysym = string_to_keysym(special_X_keysyms[character])
         return self.display.keysym_to_keycode(ch_keysym)
 
+    def toggle_shift_state(self):
+        '''Does toggling for the shift state.'''
+        if self.shift_state == 0:
+            self.shift_state = 1
+        elif self.shift_state == 1:
+            self.shift_state = 0
+        else:
+            return False
+        print('Shift State Toggled!')
+        return True
+
+    def toggle_alt_state(self):
+        '''Does toggling for the shift state.'''
+        if self.shift_state == 0:
+            self.shift_state = 2
+        elif self.shift_state == 2:
+            self.shift_state = 0
+        else:
+            return False
+        print('Alt State Toggled!')
+        return True
