@@ -298,11 +298,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         while len(data):
             event, data = rq.EventField(None).parse_binary_value(data, self.display.display, None, None)
             if event.type == X.KeyPress:
-                #Stop if escape is pressed, this may go away at some point
-                if event.detail == self.escape_code():
-                    self.stop()
-                else:
-                    self.key_press(event.detail)
+                self.key_press(event.detail)
             elif event.type == X.KeyRelease:
                 self.key_release(event.detail)
             else:
@@ -310,6 +306,8 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
 
     def key_press(self, keycode):
         """A key has been pressed, do stuff."""
+        if self.escape_code(event):  # Quit if this returns True
+            self.stop()
         #Alter modification states
         if keycode in self.mod_keycodes['Shift'] or keycode in self.mod_keycodes['Lock']:
             self.toggle_shift_state()
@@ -328,8 +326,10 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         else:
             pass
 
-    def escape_code(self):
-        return(self.lookup_character_value('Escape'))
+    def escape_code(self, event):
+        if event.detail == self.lookup_character_value('Escape'):
+            return True
+        return False
 
     def lookup_char_from_keycode(self, keycode):
         keysym =self.display.keycode_to_keysym(keycode, self.shift_state + self.alt_state)
