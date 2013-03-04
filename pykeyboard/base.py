@@ -62,11 +62,10 @@ class PyKeyboardEventMeta(Thread):
     """
     The base class for PyKeyboard. Represents basic operational model.
     """
-    def __init__(self, capture=False, captureMove=False):
+    def __init__(self, capture=False):
         Thread.__init__(self)
         self.daemon = True
         self.capture = capture
-        self.captureMove = captureMove
         self.state = True
 
     def run(self):
@@ -80,11 +79,11 @@ class PyKeyboardEventMeta(Thread):
 
     def key_press(self, key):
         """Subclass this method with your key press event handler."""
-        raise NotImplementedError
+        raise NotImplementedError('This base method needs to be subclassed')
 
     def key_release(self, key):
         """Subclass this method with your key release event handler."""
-        raise NotImplementedError
+        raise NotImplementedError('This base method needs to be subclassed')
 
     def escape_code(self):
         """
