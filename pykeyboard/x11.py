@@ -315,7 +315,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         elif keycode in self.mod_keycodes['Alt']:
             self.toggle_alt_state()
         else:
-            self.key_press()
+            self.key_press(keycode)
 
     def _key_release(self, keycode):
         """A key has been released, do stuff."""
@@ -325,7 +325,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         elif keycode in self.mod_keycodes['Alt']:
             self.toggle_alt_state()
         else:
-            self.key_release()
+            self.key_release(keycode)
 
     def escape_code(self, event):
         if event.detail == self.lookup_character_value('Escape'):

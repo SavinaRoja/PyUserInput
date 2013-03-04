@@ -304,6 +304,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
             self.toggle_shift_state()
         if event.GetKey() in ['Menu', 'Lmenu', 'Rmenu']:
             self.toggle_alt_state()
+        self.key_release()
         #print('Key Released!')
         #print('GetKey: {0}'.format(event.GetKey()))  # Name of the virtual keycode, str
         #print('IsAlt: {0}'.format(event.IsAlt()))  # Was the alt key depressed?, bool
