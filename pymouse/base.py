@@ -45,7 +45,7 @@ class PyMouseMeta(object):
             self.release(x, y, button)
  
     def move(self, x, y):
-        """Move the mouse to a givven x and y"""
+        """Move the mouse to a given x and y"""
 
         raise NotImplementedError
 
@@ -75,9 +75,8 @@ class PyMouseEventMeta(Thread):
     def click(self, x, y, button, press):
         """Subclass this method with your click event handler"""
 
-        raise NotImplementedError
+        raise NotImplementedError('This base method needs to be subclassed')
 
     def move(self, x, y):
         """Subclass this method with your move event handler"""
-
-        raise NotImplementedError
+        raise NotImplementedError('This base method needs to be subclassed')
