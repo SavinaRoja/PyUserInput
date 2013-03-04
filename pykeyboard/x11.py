@@ -235,7 +235,6 @@ class PyKeyboard(PyKeyboardMeta):
         self.accept_key = None
         self.modechange_key = None
         self.sleep_key = None
-        
 
     def lookup_character_value(self, character):
         """
@@ -249,7 +248,7 @@ class PyKeyboard(PyKeyboardMeta):
 
 class PyKeyboardEvent(PyKeyboardEventMeta):
     """
-    The PyKeyboard implementation for X11 systems (mostly linux). This
+    The PyKeyboardEvent implementation for X11 systems (mostly linux). This
     allows one to listen for keyboard input.
     """
     def __init__(self, display=None):
@@ -276,6 +275,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
 
     def run(self):
         """Begin listening for keyboard input events."""
+        self.state = True
         if self.capture:
             self.display2.screen().root.grab_keyboard(True, X.KeyPressMask | X.KeyReleaseMask, X.GrabModeAsync, X.GrabModeAsync, 0, 0, X.CurrentTime)
 
@@ -284,6 +284,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
 
     def stop(self):
         """Stop listening for keyboard input events."""
+        self.state = False
         self.display.record_disable_context(self.ctx)
         self.display.ungrab_keyboard(X.CurrentTime)
         self.display.flush()
