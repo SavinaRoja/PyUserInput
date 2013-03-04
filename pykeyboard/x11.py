@@ -301,13 +301,13 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
                 if self.escape_code(event):  # Quit if this returns True
                     self.stop()
                 else:
-                    self.key_press(event.detail)
+                    self._key_press(event.detail)
             elif event.type == X.KeyRelease:
-                self.key_release(event.detail)
+                self._key_release(event.detail)
             else:
                 print('WTF: {0}'.format(event.type))
 
-    def key_press(self, keycode):
+    def _key_press(self, keycode):
         """A key has been pressed, do stuff."""
         #Alter modification states
         if keycode in self.mod_keycodes['Shift'] or keycode in self.mod_keycodes['Lock']:
@@ -315,9 +315,9 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         elif keycode in self.mod_keycodes['Alt']:
             self.toggle_alt_state()
         else:
-            pass
+            self.key_press()
 
-    def key_release(self, keycode):
+    def _key_release(self, keycode):
         """A key has been released, do stuff."""
         #Alter modification states
         if keycode in self.mod_keycodes['Shift']:
@@ -325,7 +325,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         elif keycode in self.mod_keycodes['Alt']:
             self.toggle_alt_state()
         else:
-            pass
+            self.key_release()
 
     def escape_code(self, event):
         if event.detail == self.lookup_character_value('Escape'):

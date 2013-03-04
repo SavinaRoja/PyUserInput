@@ -79,11 +79,11 @@ class PyKeyboardEventMeta(Thread):
 
     def key_press(self, key):
         """Subclass this method with your key press event handler."""
-        raise NotImplementedError('This base method needs to be subclassed')
+        print('This base key_press method does nothing, subclass it!')
 
     def key_release(self, key):
         """Subclass this method with your key release event handler."""
-        raise NotImplementedError('This base method needs to be subclassed')
+        print('This base key_release method does nothing, subclass it!')
 
     def escape_code(self):
         """

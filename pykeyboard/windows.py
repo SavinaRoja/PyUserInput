@@ -271,48 +271,48 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
     def handler(self, reply):
         """Upper level handler of keyboard events."""
         if reply.Message == pyHook.HookConstants.WM_KEYDOWN:
-            self.key_press(reply)
+            self._key_press(reply)
         elif reply.Message == pyHook.HookConstants.WM_KEYUP:
-            self.key_release(reply)
+            self._key_release(reply)
         elif reply.Message == pyHook.HookConstants.WM_SYSKEYDOWN:
-            self.key_press(reply)
+            self._key_press(reply)
         elif reply.Message == pyHook.HookConstants.WM.SYSKEYUP:
-            self.key_release(reply)
+            self._key_release(reply)
         else:
             print('Keyboard event message unhandled: {0}'.format(reply.Message))
         return not self.capture
 
-    def key_press(self, event):
+    def _key_press(self, event):
         if self.escape_code(event):  #Quit if this returns True
             self.stop()
         if event.GetKey() in ['Shift', 'Lshift', 'Rshift', 'Capital']:
             self.toggle_shift_state()
         if event.GetKey() in ['Menu', 'Lmenu', 'Rmenu']:
             self.toggle_alt_state()
-        print('Key Pressed!')
-        print('GetKey: {0}'.format(event.GetKey()))  # Name of the virtual keycode, str
-        print('IsAlt: {0}'.format(event.IsAlt()))  # Was the alt key depressed?, bool
-        print('IsExtended: {0}'.format(event.IsExtended()))  # Is this an extended key?, bool
-        print('IsInjected: {0}'.format(event.IsInjected()))  # Was this event generated programmatically?, bool
-        print('IsTransition: {0}'.format(event.IsTransition()))  #Is this a transition from up to down or vice versa?, bool
-        print('ASCII: {0}'.format(event.Ascii))  # ASCII value, if one exists, str
-        print('KeyID: {0}'.format(event.KeyID))  # Virtual key code, int
-        print('ScanCode: {0}'.format(event.ScanCode))  # Scan code, int
+        #print('Key Pressed!')
+        #print('GetKey: {0}'.format(event.GetKey()))  # Name of the virtual keycode, str
+        #print('IsAlt: {0}'.format(event.IsAlt()))  # Was the alt key depressed?, bool
+        #print('IsExtended: {0}'.format(event.IsExtended()))  # Is this an extended key?, bool
+        #print('IsInjected: {0}'.format(event.IsInjected()))  # Was this event generated programmatically?, bool
+        #print('IsTransition: {0}'.format(event.IsTransition()))  #Is this a transition from up to down or vice versa?, bool
+        #print('ASCII: {0}'.format(event.Ascii))  # ASCII value, if one exists, str
+        #print('KeyID: {0}'.format(event.KeyID))  # Virtual key code, int
+        #print('ScanCode: {0}'.format(event.ScanCode))  # Scan code, int
 
-    def key_release(self, event):
+    def _key_release(self, event):
         if event.GetKey() in ['Shift', 'Lshift', 'Rshift', 'Capital']:
             self.toggle_shift_state()
         if event.GetKey() in ['Menu', 'Lmenu', 'Rmenu']:
             self.toggle_alt_state()
-        print('Key Released!')
-        print('GetKey: {0}'.format(event.GetKey()))  # Name of the virtual keycode, str
-        print('IsAlt: {0}'.format(event.IsAlt()))  # Was the alt key depressed?, bool
-        print('IsExtended: {0}'.format(event.IsExtended()))  # Is this an extended key?, bool
-        print('IsInjected: {0}'.format(event.IsInjected()))  # Was this event generated programmatically?, bool
-        print('IsTransition: {0}'.format(event.IsTransition()))  #Is this a transition from up to down or vice versa?, bool
-        print('ASCII: {0}'.format(event.Ascii))  # ASCII value, if one exists, str
-        print('KeyID: {0}'.format(event.KeyID))  # Virtual key code, int
-        print('ScanCode: {0}'.format(event.ScanCode))  # Scan code, int
+        #print('Key Released!')
+        #print('GetKey: {0}'.format(event.GetKey()))  # Name of the virtual keycode, str
+        #print('IsAlt: {0}'.format(event.IsAlt()))  # Was the alt key depressed?, bool
+        #print('IsExtended: {0}'.format(event.IsExtended()))  # Is this an extended key?, bool
+        #print('IsInjected: {0}'.format(event.IsInjected()))  # Was this event generated programmatically?, bool
+        #print('IsTransition: {0}'.format(event.IsTransition()))  #Is this a transition from up to down or vice versa?, bool
+        #print('ASCII: {0}'.format(event.Ascii))  # ASCII value, if one exists, str
+        #print('KeyID: {0}'.format(event.KeyID))  # Virtual key code, int
+        #print('ScanCode: {0}'.format(event.ScanCode))  # Scan code, int
 
     def escape_code(self, event):
         if event.KeyID == VK_ESCAPE:
