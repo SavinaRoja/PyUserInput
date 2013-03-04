@@ -378,10 +378,10 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
 
     def toggle_alt_state(self):
         '''Does toggling for the shift state.'''
-        if self.shift_state == 0:
-            self.shift_state = 2
-        elif self.shift_state == 2:
-            self.shift_state = 0
+        if self.alt_state == 0:
+            self.alt_state = 2
+        elif self.alt_state == 2:
+            self.alt_state = 0
         else:
             return False
         return True
