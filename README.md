@@ -49,7 +49,7 @@ PyKeyboardEvent, so here's an example of subclassing PyMouseEvent:
     from pymouse import PyMouseEvent
 
     def fibo():
-        a = 1
+        a = 0
         yield a
         b = 1
         yield b
