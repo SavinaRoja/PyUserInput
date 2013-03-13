@@ -12,3 +12,47 @@
 #
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+from Quartz import *
+from AppKit import NSEvent
+from .base import PyKeyboardMeta, PyKeyboardEventMeta
+
+class PyKeyboard(PyKeyboardMeta):
+    def press_key(self, key):
+        event = CGEventCreateKeyboardEvent(None, key, True)
+        CGEventPost(kCGHIDEventTap, event)
+
+    def release_key(self, key):
+        event = CGEventCreateKeyboardEvent(None, key, False)
+        CGEventPost(kCGHIDEventTap, event)
+
+class PyKeyboardEvent(PyKeyboardEventMeta):
+    def run(self):
+        tap = CGEventTapCreate(
+            kCGSessionEventTap,
+            kCGHeadInsertEventTap,
+            kCGEventTapOptionDefault,
+            CGEventMaskBit(kCGEventKeyDown) |
+            CGEventMaskBit(kCGEventKeyUp),
+            self.handler,
+            None)
+
+        loopsource = CFMachPortCreateRunLoopSource(None, tap, 0)
+        loop = CFRunLoopGetCurrent()
+        CFRunLoopAddSource(loop, loopsource, kCFRunLoopDefaultMode)
+        CGEventTapEnable(tap, True)
+
+        while self.state:
+            CFRunLoopRunInMode(kCFRunLoopDefaultMode, 5, False)
+
+    def handler(self, proxy, type, event, refcon):
+        key = CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode)
+        if type == kCGEventKeyDown:
+            self.key_press(key)
+        elif type == kCGEventKeyUp:
+            self.key_release(key)
+        
+        if self.capture:
+            CGEventSetType(event, kCGEventNull)
+
+        return event
