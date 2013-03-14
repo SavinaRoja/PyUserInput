@@ -16,7 +16,7 @@ setup(name='PyUserInput',
       url='https://github.com/SavinaRoja/PyUserInput',
       packages = ['pykeyboard', 'pymouse'],
       license='http://www.gnu.org/licenses/gpl-3.0.html',
-      keywords='mouse keyboard user input event'
+      keywords='mouse,keyboard user input event',
       )
 
 def dependency_check(dep_list):
