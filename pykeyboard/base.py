@@ -57,6 +57,14 @@ class PyKeyboardMeta(object):
         """
         raise NotImplementedError
 
+    def is_char_shifted(self, character):
+        """Returns True if the key character is uppercase or shifted."""
+        if character.isupper():
+            return True
+        if character in '<>?:"{}|~!@#$%^&*()_+':
+            return True
+        return False
+
 class PyKeyboardEventMeta(Thread):
     """
     The base class for PyKeyboard. Represents basic operational model.

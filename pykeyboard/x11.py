@@ -109,14 +109,6 @@ class PyKeyboard(PyKeyboardMeta):
             fake_input(self.display, X.KeyRelease, char_val)
             self.display.sync()
 
-    def is_char_shifted(self, character):
-        """Returns True if the key character is uppercase or shifted."""
-        if character.isupper():
-            return True
-        if character in '<>?:"{}|~!@#$%^&*()_+':
-            return True
-        return False
-
     def special_key_assignment(self):
         """
         Determines the keycodes for common special keys on the keyboard. These

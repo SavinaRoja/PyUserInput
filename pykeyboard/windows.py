@@ -67,14 +67,6 @@ class PyKeyboard(PyKeyboardMeta):
             char_vk = win32api.VkKeyScan(character)
             win32api.keybd_event(char_vk, 0, KEYEVENTF_KEYUP, 0)
 
-    def is_char_shifted(self, character):
-        """Returns True if the key character is uppercase or shifted."""
-        if character.isupper():
-            return True
-        if character in '<>?:"{}|~!@#$%^&*()_+':
-            return True
-        return False
-
     def special_key_assignment(self):
         """
         Special Key assignment for windows
