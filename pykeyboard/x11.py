@@ -109,12 +109,6 @@ class PyKeyboard(PyKeyboardMeta):
             fake_input(self.display, X.KeyRelease, char_val)
             self.display.sync()
 
-    def type_string(self, char_string, char_interval=0):
-        """A convenience method for typing longer strings of characters."""
-        for i in char_string:
-            self.tap_key(i)
-            time.sleep(char_interval)
-    
     def is_char_shifted(self, character):
         """Returns True if the key character is uppercase or shifted."""
         if character.isupper():

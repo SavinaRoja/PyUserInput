@@ -40,12 +40,11 @@ class PyKeyboardMeta(object):
             self.release_key(character)
             time.sleep(interval)
 
-    def type_string(self, char_string, char_interval=0):
+    def type_string(self, char_string, interval=0):
         """A convenience method for typing longer strings of characters."""
         for i in char_string:
-            time.sleep(char_interval)
+            time.sleep(interval)
             self.tap_key(i)
-        raise NotImplementedError
 
     def special_key_assignment(self):
         """Makes special keys more accessible."""
