@@ -33,12 +33,12 @@ class PyKeyboardMeta(object):
         """Release a given character key."""
         raise NotImplementedError
 
-    def tap_key(self, character='', n=1):
+    def tap_key(self, character='', n=1, interval=0):
         """Press and release a given character key n times."""
         for i in xrange(n):
             self.press_key(character)
             self.release_key(character)
-        raise NotImplementedError
+            time.sleep(interval)
 
     def type_string(self, char_string, char_interval=0):
         """A convenience method for typing longer strings of characters."""

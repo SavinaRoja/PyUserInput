@@ -67,15 +67,6 @@ class PyKeyboard(PyKeyboardMeta):
             char_vk = win32api.VkKeyScan(character)
             win32api.keybd_event(char_vk, 0, KEYEVENTF_KEYUP, 0)
 
-    def tap_key(self, character='', repeat=1, char_interval=0):
-        """
-        Press and release a given character key repeat=n times.
-        """
-        for i in range(repeat):
-            self.press_key(character)
-            self.release_key(character)
-            time.sleep(char_interval)
-
     def type_string(self, char_string, char_interval=0):
         """
         A convenience method for typing longer strings of characters.

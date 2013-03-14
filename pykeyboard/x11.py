@@ -109,16 +109,6 @@ class PyKeyboard(PyKeyboardMeta):
             fake_input(self.display, X.KeyRelease, char_val)
             self.display.sync()
 
-    def tap_key(self, character='', repeat=1, char_interval=0):
-        """
-        Press and release a given character key n times. Also works with
-        character keycodes as integers, but not keysyms.
-        """
-        for i in xrange(repeat):
-            self.press_key(character)
-            self.release_key(character)
-            time.sleep(char_interval)
-    
     def type_string(self, char_string, char_interval=0):
         """A convenience method for typing longer strings of characters."""
         for i in char_string:
