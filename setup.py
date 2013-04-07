@@ -28,7 +28,7 @@ def dependency_check(dep_list):
 
 #Check for dependencies
 if sys.platform == 'darwin':  # Mac
-    dependency_check(['Qwartz', 'Appkit'])
+    dependency_check(['Quartz', 'Appkit'])
 elif sys.platform == 'win32':  # Windows
     dependency_check(['win32api', 'win32con', 'pythoncom', 'pyHook'])
 else:  # X11 (LInux)
