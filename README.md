@@ -17,7 +17,7 @@ Depending on your platform, you will need the following python modules for
 PyUserInput to function:
 
   * Linux - Xlib
-  * Mac - Qwartz, AppKit
+  * Mac - Quartz, AppKit
   * Windows - pywin32, pyHook
 
 How to get started
