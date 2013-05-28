@@ -39,8 +39,9 @@ class PyMouse(PyMouseMeta):
         self.display.sync()
 
     def move(self, x, y):
-        fake_input(self.display, X.MotionNotify, x=x, y=y)
-        self.display.sync()
+        if (x, y) != self.position():
+            fake_input(self.display, X.MotionNotify, x=x, y=y)
+            self.display.sync()
 
     def position(self):
         coord = self.display.screen().root.query_pointer()._data
