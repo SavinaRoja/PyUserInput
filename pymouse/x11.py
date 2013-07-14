@@ -28,15 +28,21 @@ class PyMouse(PyMouseMeta):
         self.display = Display(display)
         self.display2 = Display(display)
 
-    def press(self, x, y, button = 1):
+    def press(self, x, y, button=1):
         self.move(x, y)
         fake_input(self.display, X.ButtonPress, [None, 1, 3, 2, 4, 5][button])
         self.display.sync()
 
-    def release(self, x, y, button = 1):
+    def release(self, x, y, button=1):
         self.move(x, y)
         fake_input(self.display, X.ButtonRelease, [None, 1, 3, 2, 4, 5][button])
         self.display.sync()
+
+    def scroll(self, x, y, up=False, n=1):
+        if up is True:
+            self.click(x, y, button=4, n)
+        elif up is False:
+            self.click(x, y, button=5, n)
 
     def move(self, x, y):
         if (x, y) != self.position():
