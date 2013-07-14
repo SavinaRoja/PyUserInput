@@ -40,9 +40,9 @@ class PyMouse(PyMouseMeta):
 
     def scroll(self, x, y, up=False, n=1):
         if up is True:
-            self.click(x, y, button=4, n)
+            self.click(x, y, button=4, n=n)
         elif up is False:
-            self.click(x, y, button=5, n)
+            self.click(x, y, button=5, n=n)
 
     def move(self, x, y):
         if (x, y) != self.position():
