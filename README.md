@@ -73,6 +73,27 @@ PyKeyboardEvent, so here's an example of subclassing PyMouseEvent:
     C = Clickonacci()
     C.run()
 
+Intended Functionality of Capturing in PyUserInput
+--------------------------------------------------
+
+For PyMouseEvent classes, the variables "capture" and "capture_move" may be
+passed during instantiation. If `capture=True` is passed, the intended result
+is that all mouse button input will go to your program and nowhere else. The
+same is try for `capture_move=True` except it deals with mouse pointer motion
+instead of the buttons. Both may be set simultaneously, and serve to prevent
+events from propagating further. If you notice any bugs with this behavior,
+please bring it to our attention.
+
+A Short Todo List
+-----------------
+
+These are a few things I am considering for the near future development in
+PyUserInput:
+
+ * Ensuring that PyMouse capturing works for all platforms
+ * Implement PyKeyboard capturing (add PyKeyboardEvent for Mac as well)
+ * Provide a unified interface for "scrolling" in PyMouse
+
 
 Many thanks to
 --------------
