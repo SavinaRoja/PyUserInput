@@ -62,11 +62,11 @@ class PyMouseMeta(object):
         raise NotImplementedError
 
 class PyMouseEventMeta(Thread):
-    def __init__(self, capture=False, captureMove=False):
+    def __init__(self, capture=False, capture_move=False):
         Thread.__init__(self)
         self.daemon = True
         self.capture = capture
-        self.captureMove = captureMove
+        self.capture_move = capture_move
         self.state = True
 
     def stop(self):
