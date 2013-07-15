@@ -79,7 +79,7 @@ Intended Functionality of Capturing in PyUserInput
 For PyMouseEvent classes, the variables "capture" and "capture_move" may be
 passed during instantiation. If `capture=True` is passed, the intended result
 is that all mouse button input will go to your program and nowhere else. The
-same is try for `capture_move=True` except it deals with mouse pointer motion
+same is true for `capture_move=True` except it deals with mouse pointer motion
 instead of the buttons. Both may be set simultaneously, and serve to prevent
 events from propagating further. If you notice any bugs with this behavior,
 please bring it to our attention.
