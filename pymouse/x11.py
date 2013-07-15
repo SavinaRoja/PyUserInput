@@ -53,8 +53,8 @@ class PyMouse(PyMouseMeta):
         return width, height
 
 class PyMouseEvent(PyMouseEventMeta):
-    def __init__(self, display=None):
-        PyMouseEventMeta.__init__(self)
+    def __init__(self, capture=False, capture_move=False, display=None):
+        PyMouseEventMeta.__init__(self, capture=False, capture_move=False)
         self.display = Display(display)
         self.display2 = Display(display)
         self.ctx = self.display2.record_create_context(
