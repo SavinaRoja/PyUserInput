@@ -54,7 +54,7 @@ class PyMouse(PyMouseMeta):
 
 class PyMouseEvent(PyMouseEventMeta):
     def __init__(self, capture=False, capture_move=False, display=None):
-        PyMouseEventMeta.__init__(self, capture=False, capture_move=False)
+        PyMouseEventMeta.__init__(self, capture=capture, capture_move=capture_move)
         self.display = Display(display)
         self.display2 = Display(display)
         self.ctx = self.display2.record_create_context(
@@ -73,19 +73,40 @@ class PyMouseEvent(PyMouseEventMeta):
             }])
 
     def run(self):
-        if self.capture:
-            self.display2.screen().root.grab_pointer(True, X.ButtonPressMask | X.ButtonReleaseMask, X.GrabModeAsync, X.GrabModeAsync, 0, 0, X.CurrentTime)
+        try:
+            if self.capture and self.capture_move:
+                capturing = X.ButtonPressMask | X.ButtonReleaseMask | X.PointerMotionMask
+            elif self.capture:
+                capturing = X.ButtonPressMask | X.ButtonReleaseMask
+            elif self.capture_move:
+                capturing = X.PointerMotionMask
+            else:
+                capturing = False
 
-        self.display2.record_enable_context(self.ctx, self.handler)
-        self.display2.record_free_context(self.ctx)
+            if capturing:
+                self.display2.screen().root.grab_pointer(True,
+                                                         capturing,
+                                                         X.GrabModeAsync,
+                                                         X.GrabModeAsync,
+                                                         0, 0, X.CurrentTime)
+                self.display.screen().root.grab_pointer(True,
+                                                         capturing,
+                                                         X.GrabModeAsync,
+                                                         X.GrabModeAsync,
+                                                         0, 0, X.CurrentTime)
+    
+            self.display2.record_enable_context(self.ctx, self.handler)
+            self.display2.record_free_context(self.ctx)
+        except KeyboardInterrupt:
+            self.stop()
 
     def stop(self):
+        self.display.flush()
         self.display.record_disable_context(self.ctx)
         self.display.ungrab_pointer(X.CurrentTime)
-        self.display.flush()
+        self.display2.flush()
         self.display2.record_disable_context(self.ctx)
         self.display2.ungrab_pointer(X.CurrentTime)
-        self.display2.flush()
 
     def handler(self, reply):
         data = reply.data
