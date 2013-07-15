@@ -28,15 +28,21 @@ class PyMouse(PyMouseMeta):
         self.display = Display(display)
         self.display2 = Display(display)
 
-    def press(self, x, y, button = 1):
+    def press(self, x, y, button=1):
         self.move(x, y)
         fake_input(self.display, X.ButtonPress, [None, 1, 3, 2, 4, 5][button])
         self.display.sync()
 
-    def release(self, x, y, button = 1):
+    def release(self, x, y, button=1):
         self.move(x, y)
         fake_input(self.display, X.ButtonRelease, [None, 1, 3, 2, 4, 5][button])
         self.display.sync()
+
+    def scroll(self, x, y, up=False, n=1):
+        if up is True:
+            self.click(x, y, button=4, n=n)
+        elif up is False:
+            self.click(x, y, button=5, n=n)
 
     def move(self, x, y):
         if (x, y) != self.position():
@@ -113,10 +119,14 @@ class PyMouseEvent(PyMouseEventMeta):
         while len(data):
             event, data = rq.EventField(None).parse_binary_value(data, self.display.display, None, None)
 
+            #In X11, the button numbers are: leftclick=1, middleclick=2,
+            #  rightclick=3, scrollup=4, scrolldown=5
+            #  For the purposes of the cross-platform interface of PyMouse, we
+            #  invert the button number values of the right and middle buttons
             if event.type == X.ButtonPress:
-                self.click(event.root_x, event.root_y, (None, 1, 3, 2, 3, 3, 3)[event.detail], True)
+                self.click(event.root_x, event.root_y, (None, 1, 3, 2, 4, 5, 3)[event.detail], True)
             elif event.type == X.ButtonRelease:
-                self.click(event.root_x, event.root_y, (None, 1, 3, 2, 3, 3, 3)[event.detail], False)
+                self.click(event.root_x, event.root_y, (None, 1, 3, 2, 4, 5, 3)[event.detail], False)
             else:
                 self.move(event.root_x, event.root_y)
 
