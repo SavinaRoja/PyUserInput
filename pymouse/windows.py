@@ -50,8 +50,8 @@ class PyMouse(PyMouseMeta):
         return width, height
 
 class PyMouseEvent(PyMouseEventMeta):
-    def __init__(self):
-        PyMouseEventMeta.__init__(self)
+    def __init__(self, capture, capture_move):
+        PyMouseEventMeta.__init__(self, capture=capture, capture_move=capture_move)
         self.hm = pyHook.HookManager()
 
     def run(self):
@@ -87,4 +87,4 @@ class PyMouseEvent(PyMouseEventMeta):
     def _move(self, event):
         x,y = event.Position
         self.move(x, y)
-        return not self.captureMove
+        return not self.capture_move
