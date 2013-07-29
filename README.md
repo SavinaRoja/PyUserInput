@@ -98,8 +98,9 @@ PyUserInput:
 Many thanks to
 --------------
 
-Pepijn de Vos - For making [PyMouse](https://github.com/pepijndevos/PyMouse)
-and allowing me to modify and distribute it along with PyKeyboard.
+[Pepijn de Vos](https://github.com/pepijndevos) - For making
+[PyMouse](https://github.com/pepijndevos/PyMouse) and allowing me to modify
+and distribute it along with PyKeyboard.
 
 [Jack Grigg](https://github.com/pythonian4000) - For contributions to
 cross-platform scrolling in PyMouse.
