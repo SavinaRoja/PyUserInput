@@ -55,7 +55,7 @@ class PyMouseMeta(object):
             self.press(x, y, button)
             self.release(x, y, button)
 
-    def scroll(self, vertical=None, horizontal=None, ticks=False):
+    def scroll(self, vertical=None, horizontal=None, ticks=None, tick_delta_v=None, tick_delta_h=None):
         """
         The scrolling function attempts to provide a uniform interface across
         the different platforms; it faces difficulty in that not all actions
@@ -82,10 +82,10 @@ class PyMouseMeta(object):
         negative (down/left) integers. The integers will define the number of
         ticks while the signs control the direction.
 
-        The tick_delta argument may be passed to change the dynamic scroll
-        distance for Mac and Windows platforms. If not passed, it will apply
-        a default value. The default delta values should be changed using the
-        set_scroll_tick_delta(vertical, horizontal) method.
+        The tick_delta_v and tick_delta_h argument may be passed to change the
+        dynamic scroll distance for Mac and Windows platforms. If not passed,
+        it will apply a default value. The default delta values should be
+        changed using the set_scroll_tick_delta(vertical, horizontal) method.
         """
 
         raise NotImplementedError

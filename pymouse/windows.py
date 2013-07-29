@@ -26,6 +26,7 @@ class POINT(Structure):
 class PyMouse(PyMouseMeta):
     """MOUSEEVENTF_(button and action) constants 
     are defined at win32con, buttonAction is that value"""
+
     def press(self, x, y, button = 1):
         buttonAction = 2**((2*button)-1)
         self.move(x,y)
@@ -35,6 +36,14 @@ class PyMouse(PyMouseMeta):
         buttonAction = 2**((2*button))
         self.move(x,y)
         win32api.mouse_event(buttonAction, x, y)
+
+    def scroll(self, vertical=None, horizontal=None, ticks=None, tick_delta_v=None, tick_delta_h=None):
+        #Windows evidently doesn't support horizontal scrolling
+        #Windows does support dynamic ranging of scroll delta
+        if horizontal is not None:
+            print('Horizontal scrolling is not available on the X11 platform!')
+        
+        win32api.mouse_event(0x0800,0,0,int(y_movement),0)
 
     def move(self, x, y):
         windll.user32.SetCursorPos(x, y)

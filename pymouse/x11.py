@@ -38,7 +38,7 @@ class PyMouse(PyMouseMeta):
         fake_input(self.display, X.ButtonRelease, [None, 1, 3, 2, 4, 5][button])
         self.display.sync()
 
-    def scroll(self, vertical=None, horizontal=None, ticks=None):
+    def scroll(self, vertical=None, horizontal=None, ticks=None, tick_delta_v=None, tick_delta_h=None):
         #Xlib does not support horizontal scrolling
         #Xlib does not support dynamic scrolling delta, only discrete ticks
 
