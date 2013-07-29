@@ -14,7 +14,8 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Provides the operational model. 
+As the base file, this provides a rough operational model along with the
+framework to be extended by each platform.
 """
 
 import time

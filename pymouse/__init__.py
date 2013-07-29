@@ -13,7 +13,8 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""The goal of PyMouse is to have a cross-platform way to control the mouse.
+"""
+The goal of PyMouse is to have a cross-platform way to control the mouse.
 PyMouse should work on Windows, Mac and any Unix that has xlib.
 
 PyMouse is a part of PyUserInput, along with PyKeyboard, for more information

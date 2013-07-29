@@ -14,8 +14,8 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-The goal of PyKeyboard is to provide a cross-platform way to control the
-keyboard.
+The goal of PyMouse is to have a cross-platform way to control the mouse.
+PyMouse should work on Windows, Mac and any Unix that has xlib.
 
 PyKeyboard is a part of PyUserInput, along with PyMouse, for more information
 about this project, see:

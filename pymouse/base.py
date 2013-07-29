@@ -13,10 +13,12 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""The goal of PyMouse is to have a cross-platform way to control the mouse.
+"""
+The goal of PyMouse is to have a cross-platform way to control the mouse.
 PyMouse should work on Windows, Mac and any Unix that has xlib.
 
-See http://github.com/pepijndevos/PyMouse for more information.
+As the base file, this provides a rough operational model along with the
+framework to be extended by each platform.
 """
 
 from threading import Thread
@@ -24,19 +26,24 @@ from threading import Thread
 class PyMouseMeta(object):
 
     def press(self, x, y, button=1):
-        """Press the mouse on a given x, y and button.
-        Button is defined as 1 = left, 2 = right, 3 = middle."""
+        """
+        Press the mouse on a given x, y and button.
+        Button is defined as 1 = left, 2 = right, 3 = middle.
+        """
 
         raise NotImplementedError
 
     def release(self, x, y, button=1):
-        """Release the mouse on a given x, y and button.
-        Button is defined as 1 = left, 2 = right, 3 = middle."""
+        """
+        Release the mouse on a given x, y and button.
+        Button is defined as 1 = left, 2 = right, 3 = middle.
+        """
 
         raise NotImplementedError
 
     def click(self, x, y, button=1, n=1):
-        """Click a mouse button n times on a given x, y.
+        """
+        Click a mouse button n times on a given x, y.
         Button is defined as 1 = left, 2 = right, 3 = middle.
         """
 
@@ -60,14 +67,18 @@ class PyMouseMeta(object):
         raise NotImplementedError
 
     def position(self):
-        """Get the current mouse position in pixels.
-        Returns a tuple of 2 integers"""
+        """
+        Get the current mouse position in pixels.
+        Returns a tuple of 2 integers
+        """
 
         raise NotImplementedError
 
     def screen_size(self):
-        """Get the current screen size in pixels.
-        Returns a tuple of 2 integers"""
+        """
+        Get the current screen size in pixels.
+        Returns a tuple of 2 integers
+        """
 
         raise NotImplementedError
 
