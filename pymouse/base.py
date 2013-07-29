@@ -25,6 +25,10 @@ from threading import Thread
 
 class PyMouseMeta(object):
 
+    def __init__(self):
+        self.vertical_tick_delta = 1.0
+        self.horizontal_tick_delta = 1.0
+
     def press(self, x, y, button=1):
         """
         Press the mouse on a given x, y and button.
@@ -51,7 +55,7 @@ class PyMouseMeta(object):
             self.press(x, y, button)
             self.release(x, y, button)
 
-    def scroll(self, vertical=None, horizontal=None, ticks=None, tick_delta=1):
+    def scroll(self, vertical=None, horizontal=None, ticks=False):
         """
         The scrolling function attempts to provide a uniform interface across
         the different platforms; it faces difficulty in that not all actions
@@ -70,15 +74,18 @@ class PyMouseMeta(object):
         horizontal argument. Acceptable values are as for vertical; positive
         will scroll right and negative will scroll left.
 
-        Scrolling may also be controlled as a series of "ticks" by passing an
-        integer to the ticks argument. This is critically important in the
-        provision of scrolling for X11, which treats scrolling as a series of
-        button presses. For Mac and Windows, the movement delta for scrolling
-        by tick value can be modified using the tick_delta argument. The ticks
-        argument
+        Scrolling may also be controlled as a series of "ticks" by passing True
+        to the ticks argument. This is critically important to the provision of
+        scrolling support in X11 which treats scroll events as discrete button
+        events without a dynamic motion delta. When ticks is True, the vertical
+        and horizontal arguments should be passed as positive (up/right) or
+        negative (down/left) integers. The integers will define the number of
+        ticks while the signs control the direction.
 
-        
-
+        The tick_delta argument may be passed to change the dynamic scroll
+        distance for Mac and Windows platforms. If not passed, it will apply
+        a default value. The default delta values should be changed using the
+        set_scroll_tick_delta(vertical, horizontal) method.
         """
 
         raise NotImplementedError
