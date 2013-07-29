@@ -38,7 +38,29 @@ class PyMouse(PyMouseMeta):
         fake_input(self.display, X.ButtonRelease, [None, 1, 3, 2, 4, 5][button])
         self.display.sync()
 
-    def scroll(self, x, y, up=False, n=1):
+    def scroll(self, vertical=None, horizontal=None, ticks=None):
+        #Xlib does not support horizontal scrolling
+        #Xlib does not support dynamic scrolling delta, only discrete ticks
+
+        if horizontal is not None:
+            print('Horizontal scrolling is not available on the X11 platform!')
+
+        #For Xlib, ticks=True is implicit...
+        if ticks is None or ticks is True:
+            #Coerce vertical to an integer.
+            vertical = int(vertical)
+            if vertical == 0:  # No scrolling
+                print('The scrolling value was 0!')
+                return
+            elif vertical > 0:  #Scroll up
+                self.click(*self.position(), button=4, n=vertical)
+            else:  #Scroll down
+                self.click(*self.position(), button=5, n=abs(vertical))
+        else:  #If ticks was passed as something else, warn and skip
+            print('Warning: Received ticks={0}, resulting in no scrolling action!'.format(ticks))
+
+    def oldscroll(self, x, y, up=False, n=1):
+        #Xlib does not support horizontal scrolling
         if up is True:
             self.click(x, y, button=4, n=n)
         elif up is False:
