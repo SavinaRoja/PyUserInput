@@ -51,15 +51,62 @@ class PyMouseMeta(object):
             self.press(x, y, button)
             self.release(x, y, button)
 
-    def scroll(self, x, y, up=False, n=1):
+    def scroll(self, vertical=None, horizontal=None, ticks=None, tick_delta=1):
         """
-        Scroll using the mouse wheel at a given x, y.
+        The scrolling function attempts to provide a uniform interface across
+        the different platforms; it faces difficulty in that not all actions
+        are possible on every platform. The differences will be itemized in
+        each platform's sub-class. The following guidelines should be kept in
+        mind: all actions supported by a platform should be available, actions
+        which are not possible on the present platform (not cross-compatible)
+        should raise an informative error.
 
-        Pass up=True to scroll upwards and pass up=False to scroll downwards.
-        Pass a nonzero integer to the n argument to scroll that many "ticks".
+        Vertical scrolling is available on all platforms, and may be controlled
+        by the vertical argument. Values may be float or int, and should not
+        have a magnitude greater than 10. Positive values will scroll up, and
+        negative values will scroll down.
+        
+        Horizontal scrolling is available only on Mac, and is controlled by the
+        horizontal argument. Acceptable values are as for vertical; positive
+        will scroll right and negative will scroll left.
+
+        Scrolling may also be controlled as a series of "ticks" by passing an
+        integer to the ticks argument. This is critically important in the
+        provision of scrolling for X11, which treats scrolling as a series of
+        button presses. For Mac and Windows, the movement delta for scrolling
+        by tick value can be modified using the tick_delta argument. The ticks
+        argument
+
+        
+
         """
 
         raise NotImplementedError
+
+    def set_scroll_tick_delta(self, vertical=None, horizontal=None):
+        """Sets the scroll delta for scrolling by tick"""
+
+        def check_val(value):
+            """Return False if rejected, True if acceptable"""
+            try:
+                if vertical <0:  # Less than 0 is rejected
+                    print('Error: Tick-Delta values should be greater than 0')
+                    return False
+                elif vertical > 10:  # Warn about values greater than 10, but accept
+                    print('Warning: Tick-Delta values greater than 10 are not recommended')
+                    return True
+                else:  # Accept any number between 0 and 10
+                    return True
+            except TypeError:  # Passed a non-number value
+                print('Error: Tick-Delta values should be integers or floats')
+                return False
+
+        if vertical is not None:
+            if check_val(vertical):
+                self.vertical_tick_delta = float(vertical)
+        if horizontal is not None:
+            if check_val(horizontal):
+                self.horizontal_tick_delta = float(horizontal)
 
     def move(self, x, y):
         """Move the mouse to a given x and y"""
