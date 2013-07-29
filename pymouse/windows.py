@@ -39,6 +39,9 @@ class PyMouse(PyMouseMeta):
     def move(self, x, y):
         windll.user32.SetCursorPos(x, y)
 
+    def drag(self, x, y):
+        self.move(x, y)
+
     def position(self):
         pt = POINT()
         windll.user32.GetCursorPos(byref(pt))

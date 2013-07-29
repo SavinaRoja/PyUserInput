@@ -59,6 +59,12 @@ class PyMouseMeta(object):
 
         raise NotImplementedError
 
+    def drag(self, x, y):
+        """Drag the mouse to a given x and y.
+        A Drag is a Move where the mouse key is held down."""
+
+        raise NotImplementedError
+
     def position(self):
         """Get the current mouse position in pixels.
         Returns a tuple of 2 integers"""

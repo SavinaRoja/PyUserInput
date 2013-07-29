@@ -49,6 +49,9 @@ class PyMouse(PyMouseMeta):
             fake_input(self.display, X.MotionNotify, x=x, y=y)
             self.display.sync()
 
+    def drag(self, x, y):
+        self.move(x, y)
+
     def position(self):
         coord = self.display.screen().root.query_pointer()._data
         return coord["root_x"], coord["root_y"]
