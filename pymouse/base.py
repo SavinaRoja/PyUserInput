@@ -90,7 +90,7 @@ class PyMouseMeta(object):
 
         raise NotImplementedError
 
-    def set_scroll_tick_delta(self, vertical=None, horizontal=None):
+    def set_scroll_delta(self, vertical=None, horizontal=None):
         """Sets the scroll delta for scrolling by tick"""
 
         def check_val(value):
