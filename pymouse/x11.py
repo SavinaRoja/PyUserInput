@@ -30,12 +30,12 @@ class PyMouse(PyMouseMeta):
 
     def press(self, x, y, button=1):
         self.move(x, y)
-        fake_input(self.display, X.ButtonPress, [None, 1, 3, 2, 4, 5][button])
+        fake_input(self.display, X.ButtonPress, [None, 1, 3, 2, 4, 5, 6, 7][button])
         self.display.sync()
 
     def release(self, x, y, button=1):
         self.move(x, y)
-        fake_input(self.display, X.ButtonRelease, [None, 1, 3, 2, 4, 5][button])
+        fake_input(self.display, X.ButtonRelease, [None, 1, 3, 2, 4, 5, 6, 7][button])
         self.display.sync()
 
     def scroll(self, vertical=None, horizontal=None, ticks=None, tick_delta_v=None, tick_delta_h=None):
@@ -62,9 +62,9 @@ class PyMouse(PyMouseMeta):
                 if horizontal == 0:  # No scrolling
                     print('The scrolling value was 0!')
                 elif horizontal > 0:  #Scroll right
-                    self.click(*self.position(), button=7, n=vertical)
+                    self.click(*self.position(), button=7, n=horizontal)
                 else:  # Scroll left
-                    self.click(*self.position(), button=6, n=abs(vertical))
+                    self.click(*self.position(), button=6, n=abs(horizontal))
         else:  #If ticks was passed as something else, warn and skip
             print('Warning: Received ticks={0}, resulting in no scrolling action!'.format(ticks))
 
