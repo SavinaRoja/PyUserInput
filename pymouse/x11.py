@@ -39,23 +39,32 @@ class PyMouse(PyMouseMeta):
         self.display.sync()
 
     def scroll(self, vertical=None, horizontal=None, ticks=None, tick_delta_v=None, tick_delta_h=None):
-        #Xlib does not support horizontal scrolling
+        #Xlib supports both horizontal and vertical scrolling
         #Xlib does not support dynamic scrolling delta, only discrete ticks
-
-        if horizontal is not None:
-            print('Horizontal scrolling is not available on the X11 platform!')
+        #tick_delta_v and tick_delta_h are thus ignored
 
         #For Xlib, ticks=True is implicit...
         if ticks is None or ticks is True:
-            #Coerce vertical to an integer.
-            vertical = int(vertical)
-            if vertical == 0:  # No scrolling
-                print('The scrolling value was 0!')
-                return
-            elif vertical > 0:  #Scroll up
-                self.click(*self.position(), button=4, n=vertical)
-            else:  #Scroll down
-                self.click(*self.position(), button=5, n=abs(vertical))
+            #Execute vertical scroll ticks
+            if vertical is not None:
+                #Coerce to integer
+                vertical = int(vertical)
+                if vertical == 0:  # No scrolling
+                    print('The scrolling value was 0!')
+                elif vertical > 0:  #Scroll up
+                    self.click(*self.position(), button=4, n=vertical)
+                else:  #Scroll down
+                    self.click(*self.position(), button=5, n=abs(vertical))
+            #Execute horizontal scroll ticks
+            if horizontal is not None:
+                #Coerce to integer
+                horizontal = int(horizontal)
+                if horizontal == 0:  # No scrolling
+                    print('The scrolling value was 0!')
+                elif horizontal > 0:  #Scroll right
+                    self.click(*self.position(), button=7, n=vertical)
+                else:  # Scroll left
+                    self.click(*self.position(), button=6, n=abs(vertical))
         else:  #If ticks was passed as something else, warn and skip
             print('Warning: Received ticks={0}, resulting in no scrolling action!'.format(ticks))
 
