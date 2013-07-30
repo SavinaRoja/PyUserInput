@@ -32,7 +32,10 @@ class PyMouse(PyMouseMeta):
     def move(self, x, y):
         move = CGEventCreateMouseEvent(None, kCGEventMouseMoved, (x, y), 0)
         CGEventPost(kCGHIDEventTap, move)
-        
+
+    def drag(self, x, y):        
+        drag = CGEventCreateMouseEvent(None, kCGEventLeftMouseDragged, (x, y), 0)
+        CGEventPost(kCGHIDEventTap, drag)
 
     def position(self):
         loc = NSEvent.mouseLocation()
