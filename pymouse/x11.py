@@ -51,9 +51,9 @@ class PyMouse(PyMouseMeta):
                 vertical = int(vertical)
                 if vertical == 0:  # No scrolling
                     print('The scrolling value was 0!')
-                elif vertical > 0:  #Scroll up
+                elif vertical > 0:  # Scroll up
                     self.click(*self.position(), button=4, n=vertical)
-                else:  #Scroll down
+                else:  # Scroll down
                     self.click(*self.position(), button=5, n=abs(vertical))
             #Execute horizontal scroll ticks
             if horizontal is not None:
@@ -61,11 +61,11 @@ class PyMouse(PyMouseMeta):
                 horizontal = int(horizontal)
                 if horizontal == 0:  # No scrolling
                     print('The scrolling value was 0!')
-                elif horizontal > 0:  #Scroll right
+                elif horizontal > 0:  # Scroll right
                     self.click(*self.position(), button=7, n=horizontal)
                 else:  # Scroll left
                     self.click(*self.position(), button=6, n=abs(horizontal))
-        else:  #If ticks was passed as something else, warn and skip
+        else:  # If ticks was passed as something else, warn and skip
             print('Warning: Received ticks={0}, resulting in no scrolling action!'.format(ticks))
 
     def move(self, x, y):
@@ -81,6 +81,7 @@ class PyMouse(PyMouseMeta):
         width = self.display.screen().width_in_pixels
         height = self.display.screen().height_in_pixels
         return width, height
+
 
 class PyMouseEvent(PyMouseEventMeta):
     def __init__(self, capture=False, capture_move=False, display=None):
@@ -124,7 +125,7 @@ class PyMouseEvent(PyMouseEventMeta):
                                                          X.GrabModeAsync,
                                                          X.GrabModeAsync,
                                                          0, 0, X.CurrentTime)
-    
+
             self.display2.record_enable_context(self.ctx, self.handler)
             self.display2.record_free_context(self.ctx)
         except KeyboardInterrupt:
