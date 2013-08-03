@@ -21,6 +21,8 @@ from Xlib.protocol import rq
 
 from .base import PyMouseMeta, PyMouseEventMeta, ScrollSupportError
 
+button_ids = [None, 1, 3, 2, 4, 5, 6, 7]
+
 
 class PyMouse(PyMouseMeta):
     def __init__(self, display=None):
@@ -30,12 +32,12 @@ class PyMouse(PyMouseMeta):
 
     def press(self, x, y, button=1):
         self.move(x, y)
-        fake_input(self.display, X.ButtonPress, [None, 1, 3, 2, 4, 5, 6, 7][button])
+        fake_input(self.display, X.ButtonPress, button_ids[button])
         self.display.sync()
 
     def release(self, x, y, button=1):
         self.move(x, y)
-        fake_input(self.display, X.ButtonRelease, [None, 1, 3, 2, 4, 5, 6, 7][button])
+        fake_input(self.display, X.ButtonRelease, button_ids[button])
         self.display.sync()
 
     def scroll(self, vertical=None, horizontal=None, depth=None, dynamic=None):
@@ -88,7 +90,9 @@ in X11. This feature is only available on Mac and Windows.')
 
 class PyMouseEvent(PyMouseEventMeta):
     def __init__(self, capture=False, capture_move=False, display=None):
-        PyMouseEventMeta.__init__(self, capture=capture, capture_move=capture_move)
+        PyMouseEventMeta.__init__(self,
+                                  capture=capture,
+                                  capture_move=capture_move)
         self.display = Display(display)
         self.display2 = Display(display)
         self.ctx = self.display2.record_create_context(
@@ -151,6 +155,7 @@ class PyMouseEvent(PyMouseEventMeta):
             #  rightclick=3, scrollup=4, scrolldown=5
             #  For the purposes of the cross-platform interface of PyMouse, we
             #  invert the button number values of the right and middle buttons
+            #TODO: Review and consider more buttons/scrolling
             if event.type == X.ButtonPress:
                 self.click(event.root_x, event.root_y, (None, 1, 3, 2, 4, 5, 3)[event.detail], True)
             elif event.type == X.ButtonRelease:
