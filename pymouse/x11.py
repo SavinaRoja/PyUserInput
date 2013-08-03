@@ -19,7 +19,7 @@ from Xlib.ext.xtest import fake_input
 from Xlib.ext import record
 from Xlib.protocol import rq
 
-from .base import PyMouseMeta, PyMouseEventMeta
+from .base import PyMouseMeta, PyMouseEventMeta, ScrollSupportError
 
 
 class PyMouse(PyMouseMeta):
@@ -38,35 +38,38 @@ class PyMouse(PyMouseMeta):
         fake_input(self.display, X.ButtonRelease, [None, 1, 3, 2, 4, 5, 6, 7][button])
         self.display.sync()
 
-    def scroll(self, vertical=None, horizontal=None, ticks=None, tick_delta_v=None, tick_delta_h=None):
-        #Xlib supports both horizontal and vertical scrolling
-        #Xlib does not support dynamic scrolling delta, only discrete ticks
-        #tick_delta_v and tick_delta_h are thus ignored
+    def scroll(self, vertical=None, horizontal=None, depth=None, dynamic=None):
+        #Xlib supports only vertical and horizontal scrolling
+        if depth is not None:
+            raise ScrollSupportError('PyMouse cannot support depth-scrolling \
+in X11. This feature is only available on Mac.')
 
-        #For Xlib, ticks=True is implicit...
-        if ticks is None or ticks is True:
-            #Execute vertical scroll ticks
-            if vertical is not None:
-                #Coerce to integer
-                vertical = int(vertical)
-                if vertical == 0:  # No scrolling
-                    print('The scrolling value was 0!')
-                elif vertical > 0:  # Scroll up
-                    self.click(*self.position(), button=4, n=vertical)
-                else:  # Scroll down
-                    self.click(*self.position(), button=5, n=abs(vertical))
-            #Execute horizontal scroll ticks
-            if horizontal is not None:
-                #Coerce to integer
-                horizontal = int(horizontal)
-                if horizontal == 0:  # No scrolling
-                    print('The scrolling value was 0!')
-                elif horizontal > 0:  # Scroll right
-                    self.click(*self.position(), button=7, n=horizontal)
-                else:  # Scroll left
-                    self.click(*self.position(), button=6, n=abs(horizontal))
-        else:  # If ticks was passed as something else, warn and skip
-            print('Warning: Received ticks={0}, resulting in no scrolling action!'.format(ticks))
+        #Xlib does not support dynamic scrolling
+        if dynamic is not None:
+            raise ScrollSupportError('PyMouse cannot support dynamic-scrolling \
+in X11. This feature is only available on Mac and Windows.')
+
+        #Execute discrete vertical and horizontal scroll events
+        if vertical is not None:
+            #Coerce possible floats to integer
+            vertical = int(vertical)
+            #Check to see if scroll distance is 0
+            if vertical == 0:
+                print('No vertical scrolling occurred, value was 0!')
+            elif vertical > 0:  # Scroll up if positive
+                self.click(*self.position(), button=4, n=vertical)
+            else:  # Scroll down if negative
+                self.click(*self.position(), button=5, n=abs(vertical))
+        if horizontal is not None:
+            #Coerce possible floats to integer
+            horizontal = int(horizontal)
+            #Check to see if scroll distance is 0
+            if horizontal == 0:
+                print('No horizontal scrolling occurred, value was 0!')
+            elif horizontal > 0:  # Scroll right if positive
+                self.click(*self.position(), button=7, n=horizontal)
+            else:  # Scroll left if negative
+                self.click(*self.position(), button=6, n=abs(horizontal))
 
     def move(self, x, y):
         if (x, y) != self.position():
