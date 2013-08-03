@@ -50,57 +50,49 @@ class PyMouse(PyMouseMeta):
     def screen_size(self):
         return CGDisplayPixelsWide(0), CGDisplayPixelsHigh(0)
 
-    def scroll(self, vertical=None, horizontal=None, ticks=None,
-               tick_delta_v=None, tick_delta_h=None):
+    def scroll(self, vertical=None, horizontal=None, depth=None, dynamic=None):
         #Mac has the greatest scrolling functionality: supporting 3 dimensions
         #of scrolling and dynamic scroll distance events (in pixels or lines)
 
-        def scroll_event(y_movement, x_movement):
+        def scroll_event(y_movement=0, x_movement=0, n=1):
             #Movements should be no larger than +- 10
-            scrollWheelEvent = CGEventCreateScrollWheelEvent(
-                None,  # No source
-                kCGScrollEventUnitPixel,  # We are using pixel units
-                2,  # Number of wheels(dimensions)
-                y_movement,
-                x_movement)
-            CGEventPost(kCGHIDEventTap, scrollWheelEvent)
+            for i in range(n):
+                scrollWheelEvent = CGEventCreateScrollWheelEvent(
+                    None,  # No source
+                    kCGScrollEventUnitPixel,  # We are using pixel units
+                    2,  # Number of wheels(dimensions)
+                    y_movement,
+                    x_movement)
+                CGEventPost(kCGHIDEventTap, scrollWheelEvent)
 
-        if ticks is True:  # Ticks will override, and expect integers
-            #Get the tick_deltas
-            if tick_delta_v is None:
-                tick_delta_v = self.vertical_tick_delta
-            if tick_delta_h is None:
-                tick_delta_h = self.horizontal_tick_delta
-            #Execute vertical scroll ticks
+        #Default behavior: scrolling by "ticks"
+        if dynamic is None:
+            #Execute discrete vertical and horizontal scroll events
             if vertical is not None:
+                #Coerce possible floats to integer
                 vertical = int(vertical)
-                if vertical == 0:  # No scrolling
-                    print('The vertical scrolling value was 0!')
-                elif vertical > 0:  # Scroll up
-                    for i in range(vertical):
-                        scroll_event(tick_delta_v, 0)
-                else:  # Scroll down
-                    for i in range(abs(vertical)):
-                        scroll_event(-1 * tick_delta_v, 0)
-            #Execute horizontal scroll ticks
+                #Check to see if scroll distance is 0
+                if vertical == 0:
+                    print('No vertical scrolling occurred, value was 0!')
+                elif vertical > 0:  # Scroll up if positive
+                    scroll_event(y_movement=10, n=vertical)
+                else:  # Scroll down if negative
+                    scroll_event(y_movement=-10, n=vertical)
             if horizontal is not None:
+                #Coerce possible floats to integer
                 horizontal = int(horizontal)
-                if horizontal == 0:  # No scrolling
-                    print('The horizontal scrolling value was 0!')
-                elif horizontal > 0:  # Scroll up
-                    for i in range(horizontal):
-                        scroll_event(0, tick_delta_h)
-                else:  # Scroll down
-                    for i in range(abs(horizontal)):
-                        scroll_event(0, -1 * tick_delta_h)
+                #Check to see if scroll distance is 0
+                if horizontal == 0:
+                    print('No horizontal scrolling occurred, value was 0!')
+                elif horizontal > 0:  # Scroll right if positive
+                    scroll_event(x_movement=10, n=vertical)
+                else:  # Scroll left if negative
+                    scroll_event(x_movement=-10, n=vertical)
 
-        elif ticks is None:  # If not ticks, expect either floats or integers
-            if vertical is not None and horizontal is not None:
-                scroll_event(vertical, horizontal)
-            elif vertical is not None:
-                scroll_event(vertical, 0)
-            elif horizontal is not None:
-                scroll_event(0, horizontal)
+        #Mac supports dynamic distance scrolling; implemented by pixels
+        else:
+            pass
+
 
 
 class PyMouseEvent(PyMouseEventMeta):
