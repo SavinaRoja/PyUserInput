@@ -76,10 +76,14 @@ class PyMouseMeta(object):
         The default scrolling behavior is to treat the arguments as a integer
         quantity of "ticks"; this is the way to provide cross-platform
         scrolling. In this mode, the scrolling will be generated as a series of
-        discretized scroll events. The other method is to pass a tuple to the
-        "dynamic" argument; this is only cross-platform for Mac and Windows
-        (Xlib does not support dynamic distance in scrolling events). In this
-        mode,
+        discretized scroll events.
+
+        The other method is to pass True to the "dynamic" argument; this is
+        only cross-platform for Mac and Windows (Xlib does not support dynamic
+        distance in scrolling events). In this mode, one can utilize the
+        dynamic scroll distance support provided by the platform to scroll a
+        specified number of pixels. A single scroll event will be generated
+        with the pixel distances provided.
         """
 
         raise NotImplementedError
