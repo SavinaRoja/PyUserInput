@@ -17,23 +17,31 @@ from Quartz import *
 from AppKit import NSEvent
 from .base import PyMouseMeta, PyMouseEventMeta
 
-pressID = [None, kCGEventLeftMouseDown, kCGEventRightMouseDown, kCGEventOtherMouseDown]
-releaseID = [None, kCGEventLeftMouseUp, kCGEventRightMouseUp, kCGEventOtherMouseUp]
+pressID = [None, kCGEventLeftMouseDown,
+           kCGEventRightMouseDown, kCGEventOtherMouseDown]
+releaseID = [None, kCGEventLeftMouseUp,
+             kCGEventRightMouseUp, kCGEventOtherMouseUp]
+
 
 class PyMouse(PyMouseMeta):
 
-    def press(self, x, y, button = 1):
-        event = CGEventCreateMouseEvent(None, pressID[button], (x, y), button - 1)
+    def press(self, x, y, button=1):
+        event = CGEventCreateMouseEvent(None,
+                                        pressID[button],
+                                        (x, y),
+                                        button - 1)
         CGEventPost(kCGHIDEventTap, event)
 
-    def release(self, x, y, button = 1):
-        event = CGEventCreateMouseEvent(None, releaseID[button], (x, y), button - 1)
+    def release(self, x, y, button=1):
+        event = CGEventCreateMouseEvent(None,
+                                        releaseID[button],
+                                        (x, y),
+                                        button - 1)
         CGEventPost(kCGHIDEventTap, event)
 
     def move(self, x, y):
         move = CGEventCreateMouseEvent(None, kCGEventMouseMoved, (x, y), 0)
         CGEventPost(kCGHIDEventTap, move)
-        
 
     def position(self):
         loc = NSEvent.mouseLocation()
@@ -42,16 +50,17 @@ class PyMouse(PyMouseMeta):
     def screen_size(self):
         return CGDisplayPixelsWide(0), CGDisplayPixelsHigh(0)
 
-    def scroll(self, vertical=None, horizontal=None, ticks=None, tick_delta_v=None, tick_delta_h=None):
-        #Mac has the greatest scrolling functionality, supporting both vertical
-        #and horizontal scrolling, along with dynamic ranging of movement delta
+    def scroll(self, vertical=None, horizontal=None, ticks=None,
+               tick_delta_v=None, tick_delta_h=None):
+        #Mac has the greatest scrolling functionality: supporting 3 dimensions
+        #of scrolling and dynamic scroll distance events (in pixels or lines)
 
         def scroll_event(y_movement, x_movement):
             #Movements should be no larger than +- 10
             scrollWheelEvent = CGEventCreateScrollWheelEvent(
-                None, #No source
-                kCGScrollEventUnitPixel, #We are using pixel units
-                2, #Number of wheels(dimensions)
+                None,  # No source
+                kCGScrollEventUnitPixel,  # We are using pixel units
+                2,  # Number of wheels(dimensions)
                 y_movement,
                 x_movement)
             CGEventPost(kCGHIDEventTap, scrollWheelEvent)
@@ -67,33 +76,32 @@ class PyMouse(PyMouseMeta):
                 vertical = int(vertical)
                 if vertical == 0:  # No scrolling
                     print('The vertical scrolling value was 0!')
-                elif vertical > 0:  #Scroll up
-                    for i in xrange(vertical):
+                elif vertical > 0:  # Scroll up
+                    for i in range(vertical):
                         scroll_event(tick_delta_v, 0)
-                else:  #Scroll down
-                    for i in xrange(abs(vertical)):
+                else:  # Scroll down
+                    for i in range(abs(vertical)):
                         scroll_event(-1 * tick_delta_v, 0)
             #Execute horizontal scroll ticks
             if horizontal is not None:
                 horizontal = int(horizontal)
                 if horizontal == 0:  # No scrolling
                     print('The horizontal scrolling value was 0!')
-                elif horizontal > 0:  #Scroll up
-                    for i in xrange(horizontal):
+                elif horizontal > 0:  # Scroll up
+                    for i in range(horizontal):
                         scroll_event(0, tick_delta_h)
-                else:  #Scroll down
-                    for i in xrange(abs(horizontal)):
+                else:  # Scroll down
+                    for i in range(abs(horizontal)):
                         scroll_event(0, -1 * tick_delta_h)
-            
-        elif ticks is None:  #If not ticks, expect either floats or integers
+
+        elif ticks is None:  # If not ticks, expect either floats or integers
             if vertical is not None and horizontal is not None:
                 scroll_event(vertical, horizontal)
             elif vertical is not None:
                 scroll_event(vertical, 0)
             elif horizontal is not None:
                 scroll_event(0, horizontal)
-        
-        
+
 
 class PyMouseEvent(PyMouseEventMeta):
     def run(self):
@@ -127,7 +135,7 @@ class PyMouseEvent(PyMouseEventMeta):
             self.click(x, y, releaseID.index(type), False)
         else:
             self.move(x, y)
-        
+
         if self.capture:
             CGEventSetType(event, kCGEventNull)
 
