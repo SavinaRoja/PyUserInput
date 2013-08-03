@@ -55,37 +55,31 @@ class PyMouseMeta(object):
             self.press(x, y, button)
             self.release(x, y, button)
 
-    def scroll(self, vertical=None, horizontal=None, ticks=None, tick_delta_v=None, tick_delta_h=None):
+    def scroll(self, vertical=None, horizontal=None, depth=None,
+               dynamic=None):
         """
-        The scrolling function attempts to provide a uniform interface across
-        the different platforms; it faces difficulty in that not all actions
-        are possible on every platform. The differences will be itemized in
-        each platform's sub-class. The following guidelines should be kept in
-        mind: all actions supported by a platform should be available, actions
-        which are not possible on the present platform (not cross-compatible)
-        should raise an informative error.
+        This function seeks to provide a uniform interface across platforms for
+        scrolling. This is made somewhat tricky due to different scrolling
+        support between platforms. Ideally each platform''s full flexiblity will
+        be preserved, while maintaining an easy means to code cross-platform
+        scrolling actions.
 
-        Vertical scrolling is available on all platforms, and may be controlled
-        by the vertical argument. Values may be float or int, and should not
-        have a magnitude greater than 10. Positive values will scroll up, and
-        negative values will scroll down.
-        
-        Horizontal scrolling is available only on Mac, and is controlled by the
-        horizontal argument. Acceptable values are as for vertical; positive
-        will scroll right and negative will scroll left.
+        All platforms support scrolling in at least two axes: "horizontal" and
+        "vertical". Mac supports a third axis named "depth", which cannot be
+        emulated on the other platforms. Values for these arguments may be
+        positive or negative numbers (float or int). Refer to the following
+        mapping of sign to direction:
+            Vertical: + Up, - Down
+            Horizontal: + Right, - Left
+            Depth: + Rise (out of display), - Dive (towards display)
 
-        Scrolling may also be controlled as a series of "ticks" by passing True
-        to the ticks argument. This is critically important to the provision of
-        scrolling support in X11 which treats scroll events as discrete button
-        events without a dynamic motion delta. When ticks is True, the vertical
-        and horizontal arguments should be passed as positive (up/right) or
-        negative (down/left) integers. The integers will define the number of
-        ticks while the signs control the direction.
-
-        The tick_delta_v and tick_delta_h argument may be passed to change the
-        dynamic scroll distance for Mac and Windows platforms. If not passed,
-        it will apply a default value. The default delta values should be
-        changed using the set_scroll_tick_delta(vertical, horizontal) method.
+        The default scrolling behavior is to treat the arguments as a integer
+        quantity of "ticks"; this is the way to provide cross-platform
+        scrolling. In this mode, the scrolling will be generated as a series of
+        discretized scroll events. The other method is to pass a tuple to the
+        "dynamic" argument; this is only cross-platform for Mac and Windows
+        (Xlib does not support dynamic distance in scrolling events). In this
+        mode,
         """
 
         raise NotImplementedError
