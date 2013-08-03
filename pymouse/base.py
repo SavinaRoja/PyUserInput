@@ -30,10 +30,6 @@ class ScrollSupportError(Exception):
 
 class PyMouseMeta(object):
 
-    def __init__(self):
-        self.vertical_tick_delta = 1.0
-        self.horizontal_tick_delta = 1.0
-
     def press(self, x, y, button=1):
         """
         Press the mouse on a given x, y and button.
@@ -91,31 +87,6 @@ class PyMouseMeta(object):
         """
 
         raise NotImplementedError
-
-    def set_scroll_delta(self, vertical=None, horizontal=None):
-        """Sets the scroll delta for scrolling by tick"""
-
-        def check_val(value):
-            """Return False if rejected, True if acceptable"""
-            try:
-                if vertical <0:  # Less than 0 is rejected
-                    print('Error: Tick-Delta values should be greater than 0')
-                    return False
-                elif vertical > 10:  # Warn about values greater than 10, but accept
-                    print('Warning: Tick-Delta values greater than 10 are not recommended')
-                    return True
-                else:  # Accept any number between 0 and 10
-                    return True
-            except TypeError:  # Passed a non-number value
-                print('Error: Tick-Delta values should be integers or floats')
-                return False
-
-        if vertical is not None:
-            if check_val(vertical):
-                self.vertical_tick_delta = float(vertical)
-        if horizontal is not None:
-            if check_val(horizontal):
-                self.horizontal_tick_delta = float(horizontal)
 
     def move(self, x, y):
         """Move the mouse to a given x and y"""
