@@ -23,6 +23,11 @@ framework to be extended by each platform.
 
 from threading import Thread
 
+
+class ScrollSupportError(Exception):
+    pass
+
+
 class PyMouseMeta(object):
 
     def __init__(self):
@@ -55,8 +60,7 @@ class PyMouseMeta(object):
             self.press(x, y, button)
             self.release(x, y, button)
 
-    def scroll(self, vertical=None, horizontal=None, depth=None,
-               dynamic=None):
+    def scroll(self, vertical=None, horizontal=None, depth=None, dynamic=None):
         """
         This function seeks to provide a uniform interface across platforms for
         scrolling. This is made somewhat tricky due to different scrolling
