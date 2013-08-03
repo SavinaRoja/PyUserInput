@@ -37,35 +37,26 @@ class PyMouse(PyMouseMeta):
         self.move(x,y)
         win32api.mouse_event(buttonAction, x, y)
 
-    def scroll(self, vertical=None, horizontal=None, ticks=None, tick_delta_v=None, tick_delta_h=None):
-        #Windows evidently doesn't support horizontal scrolling
-        #Windows does support dynamic ranging of scroll delta
 
-        def scroll_event(y_movement):
+    def scroll(self, vertical=None, horizontal=None, depth=None, dynamic=None):
+        #Windows supports only vertical and horizontal scrolling
+        if depth is not None:
+            raise ScrollSupportError('PyMouse cannot support depth-scrolling \
+in Windows. This feature is only available on Mac.')
+
+        #Default behavior: scrolling by "ticks"
+        if dynamic is None:
+            pass
+
+        #Windows supports dynamic distance scrolling; implemented by pixels
+        else:
+            pass
+
+        def vertical_scroll(y_movement=120):
             win32api.mouse_event(0x0800,0,0,int(y_movement),0)
 
-        if horizontal is not None:
-            print('Horizontal scrolling is not available on the Windows platform!')
-
-        if ticks is True:  # Ticks will override, and expect integers
-            #Get the tick_deltas
-            if tick_delta_v is None:
-                tick_delta_v = self.vertical_tick_delta
-            #Execute vertical scroll ticks
-            if vertical is not None:
-                vertical = int(vertical)
-                if vertical == 0:  # No scrolling
-                    print('The vertical scrolling value was 0!')
-                elif vertical > 0:  #Scroll up
-                    for i in xrange(vertical):
-                        scroll_event(tick_delta_v)
-                else:  #Scroll down
-                    for i in xrange(abs(vertical)):
-                        scroll_event(-1 * tick_delta_v)
-        else:
-            if vertical is not None:
-                scroll_event(vertical)
-
+        def horizontal_scroll(x_movement=120):
+            win32api.mouse_event(0x1000, 0, 0, int(x_movement), 0)
 
     def move(self, x, y):
         windll.user32.SetCursorPos(x, y)
