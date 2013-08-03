@@ -15,7 +15,7 @@
 
 from ctypes import *
 import win32api, win32con
-from .base import PyMouseMeta, PyMouseEventMeta
+from .base import PyMouseMeta, PyMouseEventMeta, ScrollSupportError
 import pythoncom, pyHook
 from time import sleep
 
@@ -24,14 +24,14 @@ class POINT(Structure):
                 ("y", c_ulong)]
 
 class PyMouse(PyMouseMeta):
-    """MOUSEEVENTF_(button and action) constants 
+    """MOUSEEVENTF_(button and action) constants
     are defined at win32con, buttonAction is that value"""
 
     def press(self, x, y, button = 1):
         buttonAction = 2**((2*button)-1)
         self.move(x,y)
         win32api.mouse_event(buttonAction, x, y)
-     
+
     def release(self, x, y, button = 1):
         buttonAction = 2**((2*button))
         self.move(x,y)
@@ -65,7 +65,7 @@ class PyMouse(PyMouseMeta):
         else:
             if vertical is not None:
                 scroll_event(vertical)
-            
+
 
     def move(self, x, y):
         windll.user32.SetCursorPos(x, y)

@@ -15,7 +15,7 @@
 
 from Quartz import *
 from AppKit import NSEvent
-from .base import PyMouseMeta, PyMouseEventMeta
+from .base import PyMouseMeta, PyMouseEventMeta, ScrollSupportError
 
 pressID = [None, kCGEventLeftMouseDown,
            kCGEventRightMouseDown, kCGEventOtherMouseDown]
