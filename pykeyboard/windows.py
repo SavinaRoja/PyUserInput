@@ -84,17 +84,17 @@ class PyKeyboard(PyKeyboardMeta):
         self.control_key = VK_CONTROL
         self.control_l_key = VK_LCONTROL
         self.control_r_key = VK_RCONTROL
-        #Windows uses "menu" to refer to Alt... 
+        #Windows uses "menu" to refer to Alt...
         self.menu_key = VK_MENU
         self.alt_l_key = VK_LMENU
         self.alt_r_key = VK_RMENU
-        self.alt_key = self.menu_key
+        self.alt_key = self.alt_l_key
         self.pause_key = VK_PAUSE
         self.caps_lock_key = VK_CAPITAL
         self.capital_key = self.caps_lock_key
         self.num_lock_key = VK_NUMLOCK
         self.scroll_lock_key = VK_SCROLL
-        #Windows Language Keys, 
+        #Windows Language Keys,
         self.kana_key = VK_KANA
         self.hangeul_key = VK_HANGEUL # old name - should be here for compatibility
         self.hangul_key = VK_HANGUL
