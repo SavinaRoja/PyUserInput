@@ -51,7 +51,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
             self.key_press(key)
         elif type == kCGEventKeyUp:
             self.key_release(key)
-        
+
         if self.capture:
             CGEventSetType(event, kCGEventNull)
 

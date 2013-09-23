@@ -25,43 +25,43 @@ from .base import PyKeyboardMeta, PyKeyboardEventMeta
 import time
 
 special_X_keysyms = {
-    ' ' : "space",
-    '\t' : "Tab",
-    '\n' : "Return",  # for some reason this needs to be cr, not lf
-    '\r' : "Return",
-    '\e' : "Escape",
-    '!' : "exclam",
-    '#' : "numbersign",
-    '%' : "percent",
-    '$' : "dollar",
-    '&' : "ampersand",
-    '"' : "quotedbl",
-    '\'' : "apostrophe",
-    '(' : "parenleft",
-    ')' : "parenright",
-    '*' : "asterisk",
-    '=' : "equal",
-    '+' : "plus",
-    ',' : "comma",
-    '-' : "minus",
-    '.' : "period",
-    '/' : "slash",
-    ':' : "colon",
-    ';' : "semicolon",
-    '<' : "less",
-    '>' : "greater",
-    '?' : "question",
-    '@' : "at",
-    '[' : "bracketleft",
-    ']' : "bracketright",
-    '\\' : "backslash",
-    '^' : "asciicircum",
-    '_' : "underscore",
-    '`' : "grave",
-    '{' : "braceleft",
-    '|' : "bar",
-    '}' : "braceright",
-    '~' : "asciitilde"
+    ' ': "space",
+    '\t': "Tab",
+    '\n': "Return",  # for some reason this needs to be cr, not lf
+    '\r': "Return",
+    '\e': "Escape",
+    '!': "exclam",
+    '#': "numbersign",
+    '%': "percent",
+    '$': "dollar",
+    '&': "ampersand",
+    '"': "quotedbl",
+    '\'': "apostrophe",
+    '(': "parenleft",
+    ')': "parenright",
+    '*': "asterisk",
+    '=': "equal",
+    '+': "plus",
+    ',': "comma",
+    '-': "minus",
+    '.': "period",
+    '/': "slash",
+    ':': "colon",
+    ';': "semicolon",
+    '<': "less",
+    '>': "greater",
+    '?': "question",
+    '@': "at",
+    '[': "bracketleft",
+    ']': "bracketright",
+    '\\': "backslash",
+    '^': "asciicircum",
+    '_': "underscore",
+    '`': "grave",
+    '{': "braceleft",
+    '|': "bar",
+    '}': "braceright",
+    '~': "asciitilde"
     }
 
 class PyKeyboard(PyKeyboardMeta):
@@ -74,7 +74,7 @@ class PyKeyboard(PyKeyboardMeta):
         self.display = Display(display)
         self.display2 = Display(display)
         self.special_key_assignment()
-    
+
     def press_key(self, character=''):
         """
         Press a given character key. Also works with character keycodes as
@@ -169,7 +169,7 @@ class PyKeyboard(PyKeyboardMeta):
         self.print_key = self.lookup_character_value('Print')
         self.print_screen_key = self.print_key  # Seems to be the same thing
         self.snapshot_key = self.print_key  # Another name for printscreen
-        self.execute_key = self.lookup_character_value('Execute') 
+        self.execute_key = self.lookup_character_value('Execute')
         self.insert_key = self.lookup_character_value('Insert')
         self.undo_key = self.lookup_character_value('Undo')
         self.redo_key = self.lookup_character_value('Redo')
