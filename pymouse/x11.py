@@ -40,34 +40,25 @@ class PyMouse(PyMouseMeta):
         fake_input(self.display, X.ButtonRelease, button_ids[button])
         self.display.sync()
 
-    def scroll(self, vertical=None, horizontal=None, depth=None, dynamic=None):
+    def scroll(self, vertical=None, horizontal=None, depth=None):
         #Xlib supports only vertical and horizontal scrolling
         if depth is not None:
             raise ScrollSupportError('PyMouse cannot support depth-scrolling \
 in X11. This feature is only available on Mac.')
 
-        #Xlib does not support dynamic scrolling
-        if dynamic is not None:
-            raise ScrollSupportError('PyMouse cannot support dynamic-scrolling \
-in X11. This feature is only available on Mac and Windows.')
-
-        #Execute discrete vertical and horizontal scroll events
+        #Execute vertical then horizontal scrolling events
         if vertical is not None:
-            #Coerce possible floats to integer
             vertical = int(vertical)
-            #Check to see if scroll distance is 0
-            if vertical == 0:
-                print('No vertical scrolling occurred, value was 0!')
+            if vertical == 0:  # Do nothing with 0 distance
+                pass
             elif vertical > 0:  # Scroll up if positive
                 self.click(*self.position(), button=4, n=vertical)
             else:  # Scroll down if negative
                 self.click(*self.position(), button=5, n=abs(vertical))
         if horizontal is not None:
-            #Coerce possible floats to integer
             horizontal = int(horizontal)
-            #Check to see if scroll distance is 0
-            if horizontal == 0:
-                print('No horizontal scrolling occurred, value was 0!')
+            if horizontal == 0:  # Do nothing with 0 distance
+                pass
             elif horizontal > 0:  # Scroll right if positive
                 self.click(*self.position(), button=7, n=horizontal)
             else:  # Scroll left if negative
@@ -155,12 +146,9 @@ class PyMouseEvent(PyMouseEventMeta):
             #  rightclick=3, scrollup=4, scrolldown=5
             #  For the purposes of the cross-platform interface of PyMouse, we
             #  invert the button number values of the right and middle buttons
-            #TODO: Review and consider more buttons/scrolling
             if event.type == X.ButtonPress:
                 self.click(event.root_x, event.root_y, (None, 1, 3, 2, 4, 5, 3)[event.detail], True)
             elif event.type == X.ButtonRelease:
                 self.click(event.root_x, event.root_y, (None, 1, 3, 2, 4, 5, 3)[event.detail], False)
             else:
                 self.move(event.root_x, event.root_y)
-
-

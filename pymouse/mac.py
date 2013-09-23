@@ -15,7 +15,7 @@
 
 from Quartz import *
 from AppKit import NSEvent
-from .base import PyMouseMeta, PyMouseEventMeta, ScrollSupportError
+from .base import PyMouseMeta, PyMouseEventMeta
 
 pressID = [None, kCGEventLeftMouseDown,
            kCGEventRightMouseDown, kCGEventOtherMouseDown]
@@ -50,49 +50,44 @@ class PyMouse(PyMouseMeta):
     def screen_size(self):
         return CGDisplayPixelsWide(0), CGDisplayPixelsHigh(0)
 
-    def scroll(self, vertical=None, horizontal=None, depth=None, dynamic=None):
-        #Mac has the greatest scrolling functionality: supporting 3 dimensions
-        #of scrolling and dynamic scroll distance events (in pixels or lines)
-
-        def scroll_event(y_movement=0, x_movement=0, n=1):
-            #Movements should be no larger than +- 10
-            for i in range(n):
+    def scroll(self, vertical=None, horizontal=None, depth=None):
+        #Local submethod for generating Mac scroll events in one axis at a time
+        def scroll_event(y_move=None, x_move=None, z_move=None, n=1):
+            for _ in range(abs(n)):
                 scrollWheelEvent = CGEventCreateScrollWheelEvent(
                     None,  # No source
-                    kCGScrollEventUnitPixel,  # We are using pixel units
-                    2,  # Number of wheels(dimensions)
-                    y_movement,
-                    x_movement)
+                    kCGScrollEventUnitLine,  # Unit of measurement is lines
+                    3,  # Number of wheels(dimensions)
+                    y_move,
+                    x_move,
+                    z_move)
                 CGEventPost(kCGHIDEventTap, scrollWheelEvent)
 
-        #Default behavior: scrolling by "ticks"
-        if dynamic is None:
-            #Execute discrete vertical and horizontal scroll events
-            if vertical is not None:
-                #Coerce possible floats to integer
-                vertical = int(vertical)
-                #Check to see if scroll distance is 0
-                if vertical == 0:
-                    print('No vertical scrolling occurred, value was 0!')
-                elif vertical > 0:  # Scroll up if positive
-                    scroll_event(y_movement=10, n=vertical)
-                else:  # Scroll down if negative
-                    scroll_event(y_movement=-10, n=vertical)
-            if horizontal is not None:
-                #Coerce possible floats to integer
-                horizontal = int(horizontal)
-                #Check to see if scroll distance is 0
-                if horizontal == 0:
-                    print('No horizontal scrolling occurred, value was 0!')
-                elif horizontal > 0:  # Scroll right if positive
-                    scroll_event(x_movement=10, n=vertical)
-                else:  # Scroll left if negative
-                    scroll_event(x_movement=-10, n=vertical)
-
-        #Mac supports dynamic distance scrolling; implemented by pixels
-        else:
-            pass
-
+        #Execute vertical then horizontal then depth scrolling events
+        if vertical is not None:
+            vertical = int(vertical)
+            if vertical == 0:   # Do nothing with 0 distance
+                pass
+            elif vertical > 0:  # Scroll up if positive
+                scroll_event(y_movement=1, n=vertical)
+            else:  # Scroll down if negative
+                scroll_event(y_movement=-1, n=abs(vertical))
+        if horizontal is not None:
+            horizontal = int(horizontal)
+            if horizontal == 0:  # Do nothing with 0 distance
+                pass
+            elif horizontal > 0:  # Scroll right if positive
+                scroll_event(x_movement=1, n=horizontal)
+            else:  # Scroll left if negative
+                scroll_event(x_movement=-1, n=abs(horizontal))
+        if depth is not None:
+            depth = int(depth)
+            if depth == 0:  # Do nothing with 0 distance
+                pass
+            elif vertical > 0:  # Scroll "out" if positive
+                scroll_event(z_movement=1, n=depth)
+            else:  # Scroll "in" if negative
+                scroll_event(z_movement=-1, n=abs(depth))
 
 
 class PyMouseEvent(PyMouseEventMeta):

@@ -37,43 +37,34 @@ class PyMouse(PyMouseMeta):
         self.move(x, y)
         win32api.mouse_event(buttonAction, x, y)
 
-    def scroll(self, vertical=None, horizontal=None, depth=None, dynamic=None):
+    def scroll(self, vertical=None, horizontal=None, depth=None):
 
         #Windows supports only vertical and horizontal scrolling
         if depth is not None:
             raise ScrollSupportError('PyMouse cannot support depth-scrolling \
 in Windows. This feature is only available on Mac.')
 
-        #Default behavior: scrolling by "ticks"
-        if dynamic is None:
-            if vertical is not None:
-                #Coerce possible floats to integer
-                vertical = int(vertical)
-                #Check to see if scroll distance is 0
-                if vertical == 0:
-                    print('No vertical scrolling occurred, value was 0!')
-                elif vertical > 0:  # Scroll up if positive
-                    for _ in range(vertical):
-                        win32api.mouse_event(0x0800, 0, 0, 120, 0)
-                else:  # Scroll down if negative
-                    for _ in range(abs(vertical)):
-                        win32api.mouse_event(0x0800, 0, 0, -120, 0)
-            if horizontal is not None:
-                #Coerce possible floats to integer
-                horizontal = int(horizontal)
-                #Check to see if scroll distance is 0
-                if horizontal == 0:
-                    print('No horizontal scrolling occurred, value was 0!')
-                elif horizontal > 0:  # Scroll right if positive
-                    for _ in range(horizontal):
-                        win32api.mouse_event(0x01000, 0, 0, 120, 0)
-                else:  # Scroll left if negative
-                    for _ in range(abs(horizontal)):
-                        win32api.mouse_event(0x01000, 0, 0, -120, 0)
-
-        #Windows supports dynamic distance scrolling; implemented by pixels
-        else:
-            pass
+        #Execute vertical then horizontal scrolling events
+        if vertical is not None:
+            vertical = int(vertical)
+            if vertical == 0:  # Do nothing with 0 distance
+                pass
+            elif vertical > 0:  # Scroll up if positive
+                for _ in range(vertical):
+                    win32api.mouse_event(0x0800, 0, 0, 120, 0)
+            else:  # Scroll down if negative
+                for _ in range(abs(vertical)):
+                    win32api.mouse_event(0x0800, 0, 0, -120, 0)
+        if horizontal is not None:
+            horizontal = int(horizontal)
+            if horizontal == 0:  # Do nothing with 0 distance
+                pass
+            elif horizontal > 0:  # Scroll right if positive
+                for _ in range(horizontal):
+                    win32api.mouse_event(0x01000, 0, 0, 120, 0)
+            else:  # Scroll left if negative
+                for _ in range(abs(horizontal)):
+                    win32api.mouse_event(0x01000, 0, 0, -120, 0)
 
     def move(self, x, y):
         windll.user32.SetCursorPos(x, y)
