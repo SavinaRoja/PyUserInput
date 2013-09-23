@@ -51,7 +51,7 @@ PyKeyboard supports a wide range of special keys.
     k.tap_key(k.numpad_keys[5], n=3)  # Tap 5 on the numpad, thrice
 
 Consistency between platforms is a big challenge; I should create better documentation
-for this. Meanwhile, aside form browsing the source, the following tools will go a
+for this. Meanwhile, aside from browsing the source, the following tools will go a
 long way in showing you what is available:
 
     #If a key value is 0 or None, it's probably not supported on your platform
