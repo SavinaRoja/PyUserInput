@@ -19,7 +19,9 @@ from Xlib.ext.xtest import fake_input
 from Xlib.ext import record
 from Xlib.protocol import rq
 
-from .base import PyMouseMeta, PyMouseEventMeta
+from .base import PyMouseMeta, PyMouseEventMeta, ScrollSupportError
+
+button_ids = [None, 1, 3, 2, 4, 5, 6, 7]
 
 
 class PyMouse(PyMouseMeta):
@@ -30,19 +32,37 @@ class PyMouse(PyMouseMeta):
 
     def press(self, x, y, button=1):
         self.move(x, y)
-        fake_input(self.display, X.ButtonPress, [None, 1, 3, 2, 4, 5][button])
+        fake_input(self.display, X.ButtonPress, button_ids[button])
         self.display.sync()
 
     def release(self, x, y, button=1):
         self.move(x, y)
-        fake_input(self.display, X.ButtonRelease, [None, 1, 3, 2, 4, 5][button])
+        fake_input(self.display, X.ButtonRelease, button_ids[button])
         self.display.sync()
 
-    def scroll(self, x, y, up=False, n=1):
-        if up is True:
-            self.click(x, y, button=4, n=n)
-        elif up is False:
-            self.click(x, y, button=5, n=n)
+    def scroll(self, vertical=None, horizontal=None, depth=None):
+        #Xlib supports only vertical and horizontal scrolling
+        if depth is not None:
+            raise ScrollSupportError('PyMouse cannot support depth-scrolling \
+in X11. This feature is only available on Mac.')
+
+        #Execute vertical then horizontal scrolling events
+        if vertical is not None:
+            vertical = int(vertical)
+            if vertical == 0:  # Do nothing with 0 distance
+                pass
+            elif vertical > 0:  # Scroll up if positive
+                self.click(*self.position(), button=4, n=vertical)
+            else:  # Scroll down if negative
+                self.click(*self.position(), button=5, n=abs(vertical))
+        if horizontal is not None:
+            horizontal = int(horizontal)
+            if horizontal == 0:  # Do nothing with 0 distance
+                pass
+            elif horizontal > 0:  # Scroll right if positive
+                self.click(*self.position(), button=7, n=horizontal)
+            else:  # Scroll left if negative
+                self.click(*self.position(), button=6, n=abs(horizontal))
 
     def move(self, x, y):
         if (x, y) != self.position():
@@ -61,9 +81,12 @@ class PyMouse(PyMouseMeta):
         height = self.display.screen().height_in_pixels
         return width, height
 
+
 class PyMouseEvent(PyMouseEventMeta):
     def __init__(self, capture=False, capture_move=False, display=None):
-        PyMouseEventMeta.__init__(self, capture=capture, capture_move=capture_move)
+        PyMouseEventMeta.__init__(self,
+                                  capture=capture,
+                                  capture_move=capture_move)
         self.display = Display(display)
         self.display2 = Display(display)
         self.ctx = self.display2.record_create_context(
@@ -103,7 +126,7 @@ class PyMouseEvent(PyMouseEventMeta):
                                                          X.GrabModeAsync,
                                                          X.GrabModeAsync,
                                                          0, 0, X.CurrentTime)
-    
+
             self.display2.record_enable_context(self.ctx, self.handler)
             self.display2.record_free_context(self.ctx)
         except KeyboardInterrupt:
@@ -132,5 +155,3 @@ class PyMouseEvent(PyMouseEventMeta):
                 self.click(event.root_x, event.root_y, (None, 1, 3, 2, 4, 5, 3)[event.detail], False)
             else:
                 self.move(event.root_x, event.root_y)
-
-

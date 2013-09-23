@@ -17,23 +17,33 @@ from Quartz import *
 from AppKit import NSEvent
 from .base import PyMouseMeta, PyMouseEventMeta
 
-pressID = [None, kCGEventLeftMouseDown, kCGEventRightMouseDown, kCGEventOtherMouseDown]
-releaseID = [None, kCGEventLeftMouseUp, kCGEventRightMouseUp, kCGEventOtherMouseUp]
+pressID = [None, kCGEventLeftMouseDown,
+           kCGEventRightMouseDown, kCGEventOtherMouseDown]
+releaseID = [None, kCGEventLeftMouseUp,
+             kCGEventRightMouseUp, kCGEventOtherMouseUp]
+
 
 class PyMouse(PyMouseMeta):
-    def press(self, x, y, button = 1):
-        event = CGEventCreateMouseEvent(None, pressID[button], (x, y), button - 1)
+
+    def press(self, x, y, button=1):
+        event = CGEventCreateMouseEvent(None,
+                                        pressID[button],
+                                        (x, y),
+                                        button - 1)
         CGEventPost(kCGHIDEventTap, event)
 
-    def release(self, x, y, button = 1):
-        event = CGEventCreateMouseEvent(None, releaseID[button], (x, y), button - 1)
+    def release(self, x, y, button=1):
+        event = CGEventCreateMouseEvent(None,
+                                        releaseID[button],
+                                        (x, y),
+                                        button - 1)
         CGEventPost(kCGHIDEventTap, event)
 
     def move(self, x, y):
         move = CGEventCreateMouseEvent(None, kCGEventMouseMoved, (x, y), 0)
         CGEventPost(kCGHIDEventTap, move)
 
-    def drag(self, x, y):        
+    def drag(self, x, y):
         drag = CGEventCreateMouseEvent(None, kCGEventLeftMouseDragged, (x, y), 0)
         CGEventPost(kCGHIDEventTap, drag)
 
@@ -43,6 +53,46 @@ class PyMouse(PyMouseMeta):
 
     def screen_size(self):
         return CGDisplayPixelsWide(0), CGDisplayPixelsHigh(0)
+
+    def scroll(self, vertical=None, horizontal=None, depth=None):
+        #Local submethod for generating Mac scroll events in one axis at a time
+        def scroll_event(y_move=None, x_move=None, z_move=None, n=1):
+            for _ in range(abs(n)):
+                scrollWheelEvent = CGEventCreateScrollWheelEvent(
+                    None,  # No source
+                    kCGScrollEventUnitLine,  # Unit of measurement is lines
+                    3,  # Number of wheels(dimensions)
+                    y_move,
+                    x_move,
+                    z_move)
+                CGEventPost(kCGHIDEventTap, scrollWheelEvent)
+
+        #Execute vertical then horizontal then depth scrolling events
+        if vertical is not None:
+            vertical = int(vertical)
+            if vertical == 0:   # Do nothing with 0 distance
+                pass
+            elif vertical > 0:  # Scroll up if positive
+                scroll_event(y_movement=1, n=vertical)
+            else:  # Scroll down if negative
+                scroll_event(y_movement=-1, n=abs(vertical))
+        if horizontal is not None:
+            horizontal = int(horizontal)
+            if horizontal == 0:  # Do nothing with 0 distance
+                pass
+            elif horizontal > 0:  # Scroll right if positive
+                scroll_event(x_movement=1, n=horizontal)
+            else:  # Scroll left if negative
+                scroll_event(x_movement=-1, n=abs(horizontal))
+        if depth is not None:
+            depth = int(depth)
+            if depth == 0:  # Do nothing with 0 distance
+                pass
+            elif vertical > 0:  # Scroll "out" if positive
+                scroll_event(z_movement=1, n=depth)
+            else:  # Scroll "in" if negative
+                scroll_event(z_movement=-1, n=abs(depth))
+
 
 class PyMouseEvent(PyMouseEventMeta):
     def run(self):
@@ -76,7 +126,7 @@ class PyMouseEvent(PyMouseEventMeta):
             self.click(x, y, releaseID.index(type), False)
         else:
             self.move(x, y)
-        
+
         if self.capture:
             CGEventSetType(event, kCGEventNull)
 

@@ -15,7 +15,7 @@
 
 from ctypes import *
 import win32api, win32con
-from .base import PyMouseMeta, PyMouseEventMeta
+from .base import PyMouseMeta, PyMouseEventMeta, ScrollSupportError
 import pythoncom, pyHook
 from time import sleep
 
@@ -24,17 +24,47 @@ class POINT(Structure):
                 ("y", c_ulong)]
 
 class PyMouse(PyMouseMeta):
-    """MOUSEEVENTF_(button and action) constants 
+    """MOUSEEVENTF_(button and action) constants
     are defined at win32con, buttonAction is that value"""
-    def press(self, x, y, button = 1):
-        buttonAction = 2**((2*button)-1)
-        self.move(x,y)
+
+    def press(self, x, y, button=1):
+        buttonAction = 2 ** ((2 * button) - 1)
+        self.move(x, y)
         win32api.mouse_event(buttonAction, x, y)
-     
-    def release(self, x, y, button = 1):
-        buttonAction = 2**((2*button))
-        self.move(x,y)
+
+    def release(self, x, y, button=1):
+        buttonAction = 2 ** ((2 * button))
+        self.move(x, y)
         win32api.mouse_event(buttonAction, x, y)
+
+    def scroll(self, vertical=None, horizontal=None, depth=None):
+
+        #Windows supports only vertical and horizontal scrolling
+        if depth is not None:
+            raise ScrollSupportError('PyMouse cannot support depth-scrolling \
+in Windows. This feature is only available on Mac.')
+
+        #Execute vertical then horizontal scrolling events
+        if vertical is not None:
+            vertical = int(vertical)
+            if vertical == 0:  # Do nothing with 0 distance
+                pass
+            elif vertical > 0:  # Scroll up if positive
+                for _ in range(vertical):
+                    win32api.mouse_event(0x0800, 0, 0, 120, 0)
+            else:  # Scroll down if negative
+                for _ in range(abs(vertical)):
+                    win32api.mouse_event(0x0800, 0, 0, -120, 0)
+        if horizontal is not None:
+            horizontal = int(horizontal)
+            if horizontal == 0:  # Do nothing with 0 distance
+                pass
+            elif horizontal > 0:  # Scroll right if positive
+                for _ in range(horizontal):
+                    win32api.mouse_event(0x01000, 0, 0, 120, 0)
+            else:  # Scroll left if negative
+                for _ in range(abs(horizontal)):
+                    win32api.mouse_event(0x01000, 0, 0, -120, 0)
 
     def move(self, x, y):
         windll.user32.SetCursorPos(x, y)
@@ -71,7 +101,7 @@ class PyMouseEvent(PyMouseEventMeta):
         self.state = False
 
     def _click(self, event):
-        x,y = event.Position
+        x, y = event.Position
 
         if event.Message == pyHook.HookConstants.WM_LBUTTONDOWN:
             self.click(x, y, 1, True)
@@ -88,6 +118,6 @@ class PyMouseEvent(PyMouseEventMeta):
         return not self.capture
 
     def _move(self, event):
-        x,y = event.Position
+        x, y = event.Position
         self.move(x, y)
         return not self.capture_move
