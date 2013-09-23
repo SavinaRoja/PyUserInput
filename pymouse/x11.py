@@ -146,12 +146,13 @@ class PyMouseEvent(PyMouseEventMeta):
             event, data = rq.EventField(None).parse_binary_value(data, self.display.display, None, None)
 
             #In X11, the button numbers are: leftclick=1, middleclick=2,
-            #  rightclick=3, scrollup=4, scrolldown=5
+            #  rightclick=3, scrollup=4, scrolldown=5, scrollleft=6,
+            #  scrollright=7
             #  For the purposes of the cross-platform interface of PyMouse, we
             #  invert the button number values of the right and middle buttons
             if event.type == X.ButtonPress:
-                self.click(event.root_x, event.root_y, (None, 1, 3, 2, 4, 5, 3)[event.detail], True)
+                self.click(event.root_x, event.root_y, (None, 1, 3, 2, 4, 5, 6, 7)[event.detail], True)
             elif event.type == X.ButtonRelease:
-                self.click(event.root_x, event.root_y, (None, 1, 3, 2, 4, 5, 3)[event.detail], False)
+                self.click(event.root_x, event.root_y, (None, 1, 3, 2, 4, 5, 6, 7)[event.detail], False)
             else:
                 self.move(event.root_x, event.root_y)
