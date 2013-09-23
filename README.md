@@ -4,11 +4,12 @@ PyUserInput
 A module for cross-platform control of the mouse and keyboard in python that is
 simple to use.
 
-Mouse control should work well for most users on Windows, Mac, and X11 (most
-linux) systems.
+Mouse control should work on Windows, Mac, and X11 (most Linux systems).
+Scrolling is implemented, but users should be aware that variations may
+exist between platforms and applications.
 
-Keyboard control works on X11(linux) and Windows systems. Mac control is
-partially complete.
+Keyboard control works on X11(linux) and Windows systems. Mac control is a work
+in progress.
 
 Dependencies
 ------------
@@ -38,8 +39,25 @@ Here's an example of clicking the center of the screen and typing "Hello, World!
     m.click(x_dim/2, y_dim/2, 1)
     k.type_string('Hello, World!')
 
-I'll be working on a more complete documentation later, but most of the
-functionality should be evident in the source.
+PyKeyboard supports a wide range of special keys.
+
+    #Create an Alt+Tab combo
+    k.press_key(k.alt_key)
+    k.tap_key(k.tab_key)
+    k.release_key(k.alt_key)
+    
+    k.tap_key(k.function_keys[5])  # Tap F5
+    k.tap_key(k.numpad_keys['Home'])  # Tap 'Home' on the numpad
+    k.tap_key(k.numpad_keys[5], n=3)  # Tap 5 on the numpad, thrice
+
+Consistency between platforms is a big challenge; I should create better documentation
+for this. Meanwhile, aside form browsing the source, the following tools will go a
+long way in showing you what is available:
+
+    #If a key value is 0 or None, it's probably not supported on your platform
+    dir(k)  #Use dir() on a PyKeyboard instance
+    k.numpad_keys.viewkeys()
+    k.function_keys
 
 I'd like to make a special note about using PyMouseEvent and PyKeyboardEvent.
 These objects are a framework for listening for mouse and keyboard input; they
@@ -87,12 +105,13 @@ please bring it to our attention.
 A Short Todo List
 -----------------
 
-These are a few things I am considering for the near future development in
+These are a few things I am considering for future development in
 PyUserInput:
 
  * Ensuring that PyMouse capturing works for all platforms
  * Implement PyKeyboard capturing (add PyKeyboardEvent for Mac as well)
- * Provide a unified interface for "scrolling" in PyMouse
+ * PyMouse dynamic delta scrolling (available in Mac and Windows, hard to standardize)
+ * Make friends with more Mac developers, testing help is needed...
 
 
 Many thanks to
