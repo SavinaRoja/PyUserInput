@@ -95,10 +95,18 @@ class PyKeyboardEventMeta(Thread):
         """
         pass
 
-    def escape_code(self):
+    def escape(self, event):
         """
-        Defines a means to signal a stop to listening. Subclass this with your
-        escape behavior.
+        A function that defines when to stop listening; subclass this with your
+        escape behavior. If the program is meant to stop, this method should
+        return True. Every key event will go through this method before going to
+        tap(), allowing this method to check for exit conditions.
+
+        The default behavior is to stop when the 'Esc' key is pressed.
+
+        If one wishes to use key combinations, or key series, one might be
+        interested in reading about Finite State Machines.
+        http://en.wikipedia.org/wiki/Deterministic_finite_automaton
         """
-        escape = None
-        return escape
+        condition = None
+        return event == condition
