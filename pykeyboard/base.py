@@ -85,12 +85,14 @@ class PyKeyboardEventMeta(Thread):
     def handler(self):
         raise NotImplementedError
 
-    def key_press(self, key):
-        """Subclass this method with your key press event handler."""
-        pass
-
-    def key_release(self, key):
-        """Subclass this method with your key release event handler."""
+    def tap(self, keycode, character, press):
+        """
+        Subclass this method with your key event handler. It will receive
+        the keycode associated with the key event, as well as string name for
+        the key if one can be assigned (keyboard mask states will apply). The
+        argument 'press' will be True if the key was depressed and False if the
+        key was released.
+        """
         pass
 
     def escape_code(self):
