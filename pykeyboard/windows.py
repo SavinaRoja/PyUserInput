@@ -299,20 +299,10 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
 
     def toggle_shift_state(self):
         '''Does toggling for the shift state.'''
-        if self.shift_state == 0:
-            self.shift_state = 1
-        elif self.shift_state == 1:
-            self.shift_state = 0
-        else:
-            return False
-        return True
+        states = [1, 0]
+        self.shift_state = states[self.shift_state]
 
     def toggle_alt_state(self):
         '''Does toggling for the alt state.'''
-        if self.alt_state == 0:
-            self.alt_state = 2
-        elif self.alt_state == 2:
-            self.alt_state = 0
-        else:
-            return False
-        return True
+        states = [2, None, 0]
+        self.alt_state = states[self.alt_state]

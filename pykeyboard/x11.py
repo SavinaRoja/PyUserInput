@@ -273,11 +273,12 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         data = reply.data
         while len(data):
             event, data = rq.EventField(None).parse_binary_value(data, self.display.display, None, None)
+            keycode = event.detail
             if event.type == X.KeyPress:
-                if self.escape_code(event):  # Quit if this returns True
+                if self.escape(event):  # Quit if this returns True
                     self.stop()
                 else:
-                    self._key_press(event.detail)
+                    self._key_press(event.detail, )
             elif event.type == X.KeyRelease:
                 self._key_release(event.detail)
             else:
@@ -291,7 +292,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         elif keycode in self.mod_keycodes['Alt']:
             self.toggle_alt_state()
         else:
-            self.key_press(keycode)
+            self.tap(keycode, '', press=True)
 
     def _key_release(self, keycode):
         """A key has been released, do stuff."""
@@ -301,9 +302,9 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         elif keycode in self.mod_keycodes['Alt']:
             self.toggle_alt_state()
         else:
-            self.key_release(keycode)
+            self.tap(keycode, '', press=False)
 
-    def escape_code(self, event):
+    def escape(self, event):
         if event.detail == self.lookup_character_value('Escape'):
             return True
         return False
@@ -344,20 +345,10 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
 
     def toggle_shift_state(self):
         '''Does toggling for the shift state.'''
-        if self.shift_state == 0:
-            self.shift_state = 1
-        elif self.shift_state == 1:
-            self.shift_state = 0
-        else:
-            return False
-        return True
+        states = [1, 0]
+        self.shift_state = states[self.shift_state]
 
     def toggle_alt_state(self):
         '''Does toggling for the alt state.'''
-        if self.alt_state == 0:
-            self.alt_state = 2
-        elif self.alt_state == 2:
-            self.alt_state = 0
-        else:
-            return False
-        return True
+        states = [2, None, 0]
+        self.alt_state = states[self.alt_state]
