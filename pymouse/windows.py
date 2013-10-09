@@ -16,7 +16,7 @@
 from ctypes import *
 import win32api, win32con
 from .base import PyMouseMeta, PyMouseEventMeta, ScrollSupportError
-import pythoncom, pyHook
+import pythoncom
 from time import sleep
 
 class POINT(Structure):
@@ -84,6 +84,8 @@ in Windows. This feature is only available on Mac.')
 
 class PyMouseEvent(PyMouseEventMeta):
     def __init__(self, capture, capture_move):
+        import pyHook
+
         PyMouseEventMeta.__init__(self, capture=capture, capture_move=capture_move)
         self.hm = pyHook.HookManager()
 
