@@ -245,9 +245,13 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
                     'client_started': False,
                     'client_died': False,
             }])
-        self.shift_state = 0  # 0 is off, 1 is on
-        self.alt_state = 0  # 0 is off, 2 is on
+        self.shift_state = 0     # 0 is off, 1 is on
+        self.caps_lock_state = 0  # 0 is off, 2 is on
+        self.control_state = 0      # 0 is off, 4 is on
+        self.alt_state = 0       # 0 is off, 8 is on : mapped onto Mod1
         self.mod_keycodes = self.get_mod_keycodes()
+
+        self.skip_caps_release = False
 
     def run(self):
         """Begin listening for keyboard input events."""
@@ -273,36 +277,55 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         data = reply.data
         while len(data):
             event, data = rq.EventField(None).parse_binary_value(data, self.display.display, None, None)
-            keycode = event.detail
-            if event.type == X.KeyPress:
-                if self.escape(event):  # Quit if this returns True
-                    self.stop()
-                else:
-                    self._key_press(event.detail, )
-            elif event.type == X.KeyRelease:
-                self._key_release(event.detail)
+            if self.escape(event):  # Quit if this returns True
+                self.stop()
             else:
-                print('WTF: {0}'.format(event.type))
+                self._tap(event)
 
-    def _key_press(self, keycode):
-        """A key has been pressed, do stuff."""
-        #Alter modification states
-        if keycode in self.mod_keycodes['Shift'] or keycode in self.mod_keycodes['Lock']:
-            self.toggle_shift_state()
-        elif keycode in self.mod_keycodes['Alt']:
-            self.toggle_alt_state()
-        else:
-            self.tap(keycode, '', press=True)
+    def _tap(self, event):
+        keycode = event.detail
+        press_bool = (event.type == X.KeyPress)
 
-    def _key_release(self, keycode):
-        """A key has been released, do stuff."""
-        #Alter modification states
-        if keycode in self.mod_keycodes['Shift']:
-            self.toggle_shift_state()
-        elif keycode in self.mod_keycodes['Alt']:
-            self.toggle_alt_state()
-        else:
-            self.tap(keycode, '', press=False)
+        #Detect modifier states from event.state, in case something slips by
+        self.shift_state = event.state & 1
+        self.caps_lock_state = event.state & 2
+        self.control_state = event.state & 4
+        self.alt_state = event.state & 8
+
+        #I want to just extract states from event.state, but that details the
+        #information from JUST BEFORE the key event... this complicates things
+        #Special handling to track states
+        if keycode in self.mod_keycodes['Shift']:  # Shift state
+            if press_bool and not self.shift_state:
+                self.shift_state = 1
+            elif not press_bool and self.shift_state:
+                self.shift_state = 0
+        if keycode in self.mod_keycodes['Lock']:  # Capslock state
+            if press_bool and not self.caps_lock_state:
+                self.caps_lock_state = 2
+                self.skip_caps_release = True
+            #Capslock state is special, two releases must occur to turn off
+            elif not press_bool and self.skip_caps_release:
+                self.skip_caps_release = False
+            elif not press_bool and self.caps_lock_state:
+                self.caps_lock_state = 0
+        if keycode in self.mod_keycodes['Control']:  # Control state
+            if press_bool and not self.control_state:
+                self.control_state = 4
+            elif not press_bool and self.control_state:
+                self.control_state = 0
+        if keycode in self.mod_keycodes['Alt']:  # Alt state
+            if press_bool and not self.alt_state:
+                self.alt_state = 8
+            elif not press_bool and self.alt_state:
+                self.alt_state = 0
+
+        print(self.shift_state, self.caps_lock_state, self.control_state, self.alt_state)
+
+        #All key events get passed to self.tap()
+        self.tap(keycode,
+                 self.lookup_char_from_keycode(keycode),
+                 press=press_bool)
 
     def escape(self, event):
         if event.detail == self.lookup_character_value('Escape'):
@@ -330,7 +353,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
                ('Mod3', X.Mod3MapIndex), ('Mod4', X.Mod4MapIndex),
                ('Mod5', X.Mod5MapIndex), ('Lock', X.LockMapIndex)]
         for n, i in nti:
-            modifier_dict[n] = list(modifier_mapping[i])
+            modifier_dict[n] = [v for v in list(modifier_mapping[i]) if v]
         return modifier_dict
 
     def lookup_character_value(self, character):
@@ -342,13 +365,3 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         if ch_keysym == 0:
             ch_keysym = string_to_keysym(special_X_keysyms[character])
         return self.display.keysym_to_keycode(ch_keysym)
-
-    def toggle_shift_state(self):
-        '''Does toggling for the shift state.'''
-        states = [1, 0]
-        self.shift_state = states[self.shift_state]
-
-    def toggle_alt_state(self):
-        '''Does toggling for the alt state.'''
-        states = [2, None, 0]
-        self.alt_state = states[self.alt_state]
