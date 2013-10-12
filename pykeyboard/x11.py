@@ -251,7 +251,11 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         self.alt_state = 0       # 0 is off, 8 is on : mapped onto Mod1
         self.mod_keycodes = self.get_mod_keycodes()
 
+        #A control state variable for correct handling of Capslock
         self.skip_caps_release = False
+
+        self.keysym_dict = self.get_keysym_to_string_dict()
+
 
     def run(self):
         """Begin listening for keyboard input events."""
@@ -295,36 +299,36 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         #I want to just extract states from event.state, but that details the
         #information from JUST BEFORE the key event... this complicates things
         #Special handling to track states
-        if keycode in self.mod_keycodes['Shift']:  # Shift state
-            if press_bool and not self.shift_state:
-                self.shift_state = 1
-            elif not press_bool and self.shift_state:
-                self.shift_state = 0
-        if keycode in self.mod_keycodes['Lock']:  # Capslock state
-            if press_bool and not self.caps_lock_state:
-                self.caps_lock_state = 2
-                self.skip_caps_release = True
-            #Capslock state is special, two releases must occur to turn off
-            elif not press_bool and self.skip_caps_release:
-                self.skip_caps_release = False
-            elif not press_bool and self.caps_lock_state:
-                self.caps_lock_state = 0
-        if keycode in self.mod_keycodes['Control']:  # Control state
-            if press_bool and not self.control_state:
-                self.control_state = 4
-            elif not press_bool and self.control_state:
-                self.control_state = 0
-        if keycode in self.mod_keycodes['Alt']:  # Alt state
-            if press_bool and not self.alt_state:
-                self.alt_state = 8
-            elif not press_bool and self.alt_state:
-                self.alt_state = 0
+        #if keycode in self.mod_keycodes['Shift']:  # Shift state
+        #    if press_bool and not self.shift_state:
+        #        self.shift_state = 1
+        #    elif not press_bool and self.shift_state:
+        #        self.shift_state = 0
+        #if keycode in self.mod_keycodes['Lock']:  # Capslock state
+        #    if press_bool and not self.caps_lock_state:
+        #        self.caps_lock_state = 2
+        #        self.skip_caps_release = True
+        #    #Capslock state is special, two releases must occur to turn off
+        #    elif not press_bool and self.skip_caps_release:
+        #        self.skip_caps_release = False
+        #    elif not press_bool and self.caps_lock_state:
+        #        self.caps_lock_state = 0
+        #if keycode in self.mod_keycodes['Control']:  # Control state
+        #    if press_bool and not self.control_state:
+        #        self.control_state = 4
+        #    elif not press_bool and self.control_state:
+        #        self.control_state = 0
+        #if keycode in self.mod_keycodes['Alt']:  # Alt state
+        #    if press_bool and not self.alt_state:
+        #        self.alt_state = 8
+        #    elif not press_bool and self.alt_state:
+        #        self.alt_state = 0
 
-        print(self.shift_state, self.caps_lock_state, self.control_state, self.alt_state)
+        #print(self.shift_state, self.caps_lock_state, self.control_state, self.alt_state)
 
         #All key events get passed to self.tap()
         self.tap(keycode,
-                 self.lookup_char_from_keycode(keycode),
+                 self.lookup_char_from_keycode(keycode),  # Robust key lookup
                  press=press_bool)
 
     def escape(self, event):
@@ -333,12 +337,34 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         return False
 
     def lookup_char_from_keycode(self, keycode):
-        keysym =self.display.keycode_to_keysym(keycode, self.shift_state + self.alt_state)
-        if keysym:
-            char = self.display.lookup_string(keysym)
-            return char
-        else:
+        #As far as I can tell, the python-xlib module is incomplete with regards
+        #to translating keysyms to string names. Consider the XLookupString
+        #method:
+        #http://tronche.com/gui/x/xlib/utilities/XLookupString.html
+        #which xev uses successfully to translate special keys such as BackSpace
+        #http://xev.sourcearchive.com/documentation/1:1.0.2-0ubuntu1/xev_8c-source.html
+        #There are a few ways to address this, right now I prefer a pure Python
+        #method to address the shortcomings of display.lookup_string
+
+        keysym = self.display.keycode_to_keysym(keycode,
+                                                sum([self.shift_state,
+                                                     self.caps_lock_state,
+                                                     self.control_state,
+                                                     self.alt_state]))
+
+        #If the character is ascii printable, return that character
+        if keysym & 0x7f == keysym and self.ascii_printable(keysym):
+            return chr(keysym)
+
+        #If the character was not printable, look for its name
+        try:
+            char = self.keysym_dict[keysym]
+        except KeyError:
+            print('Unable to determine character.')
+            print('Keycode: {0} KeySym {1}'.format(keycode, keysym))
             return None
+        else:
+            return char
 
     def get_mod_keycodes(self):
         """
@@ -365,3 +391,33 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         if ch_keysym == 0:
             ch_keysym = string_to_keysym(special_X_keysyms[character])
         return self.display.keysym_to_keycode(ch_keysym)
+
+    def get_keysym_to_string_dict(self):
+        keysym_dict = {}
+
+        #Load up a dict of special character names (key=keysym, val=stringname)
+        misc = __import__('Xlib.keysymdef.miscellany',
+                          globals(), locals(), True)
+        latin1 = __import__('Xlib.keysymdef.latin1',
+                            globals(), locals(), True)
+        for module in [misc, latin1]:
+            keysyms = [n for n in module.__dict__ if n.startswith('XK_')]
+            for keysym in keysyms:
+                keysym_dict[module.__dict__[keysym]] = keysym[3:]
+        del(misc)
+        del(latin1)
+        return keysym_dict
+
+    def ascii_printable(self, keysym):
+        """Returns False if the keysym is not a printable ascii character."""
+        #Why do I have to write this, there should be a good built-in...
+        if keysym in range(9):
+            return False
+        elif keysym in [11, 12]:
+            return False
+        elif keysym in range(14, 32):
+            return False
+        elif keysym > 126:
+            return False
+        else:
+            return True
