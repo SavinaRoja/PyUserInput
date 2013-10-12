@@ -258,7 +258,12 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         self.mod_keycodes = self.get_mod_keycodes()
 
         #A control state variable for correct handling of Capslock
-        self.skip_caps_release = False
+        #self.skip_caps_release = False
+
+        #TODO: It may be possible to dynamically detect which mod#s to map Alt and NumLock onto
+        #TODO: NumLock needs to *behave* like a lock, so the behavior for the mod# should be dynamic
+        #TODO: Figure out why translating function keys was failing with NumLock on
+        #TODO: Figure out why translating alpha keys fails to capitalize when CapsLock is on
 
         self.keysym_dict = self.get_keysym_to_string_dict()
 
