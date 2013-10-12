@@ -245,10 +245,16 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
                     'client_started': False,
                     'client_died': False,
             }])
-        self.shift_state = 0     # 0 is off, 1 is on
-        self.caps_lock_state = 0  # 0 is off, 2 is on
-        self.control_state = 0      # 0 is off, 4 is on
-        self.alt_state = 0       # 0 is off, 8 is on : mapped onto Mod1
+        self.shift_state = 0      # 0 is off :   1 is on
+        self.caps_lock_state = 0  # 0 is off :   2 is on
+        self.control_state = 0    # 0 is off :   4 is on
+        self.alt_state = 0        # 0 is off :   8 is on (same as mod1)
+        self.mod1_state = 0       # 0 is off :   8 is on
+        self.mod2_state = 0       # 0 is off :  16 is on
+        self.mod3_state = 0       # 0 is off :  32 is on
+        self.mod4_state = 0       # 0 is off :  64 is on
+        self.mod5_state = 0       # 0 is off : 128 is on
+
         self.mod_keycodes = self.get_mod_keycodes()
 
         #A control state variable for correct handling of Capslock
@@ -290,12 +296,39 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         keycode = event.detail
         press_bool = (event.type == X.KeyPress)
 
-        #Detect modifier states from event.state, in case something slips by
+        #Detect modifier states from event.state
         self.shift_state = event.state & 1
         self.caps_lock_state = event.state & 2
         self.control_state = event.state & 4
         self.alt_state = event.state & 8
+        self.mod1_state = self.alt_state
+        self.mod2_state = event.state & 16
+        self.mod3_state = event.state & 32
+        self.mod4_state = event.state & 64
+        self.mod5_state = event.state & 128
 
+        #My observations suggest that lookups for the modifier keys tend to fail
+        #when they are already "On", so their state will be masked
+        mask = 0
+        if keycode in self.mod_keycodes['Shift']:
+            mask = 1
+        #elif keycode in self.mod_keycodes['Lock']  # might not be needed
+        #    mask = 2
+        elif keycode in self.mod_keycodes['Control']:
+            mask = 4
+        elif keycode in self.mod_keycodes['Alt']:
+            mask = 8
+        elif keycode in self.mod_keycodes['Mod2']:
+            mask = 16
+        elif keycode in self.mod_keycodes['Mod3']:
+            mask = 32
+        elif keycode in self.mod_keycodes['Mod4']:
+            mask = 64
+        elif keycode in self.mod_keycodes['Mod5']:
+            mask = 128
+
+        character = self.lookup_char_from_keycode(keycode,
+                                                  state=event.state & ~ mask)
         #I want to just extract states from event.state, but that details the
         #information from JUST BEFORE the key event... this complicates things
         #Special handling to track states
@@ -328,15 +361,20 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
 
         #All key events get passed to self.tap()
         self.tap(keycode,
-                 self.lookup_char_from_keycode(keycode),  # Robust key lookup
+                 character,
                  press=press_bool)
 
-    def escape(self, event):
-        if event.detail == self.lookup_character_value('Escape'):
-            return True
-        return False
-
-    def lookup_char_from_keycode(self, keycode):
+    def lookup_char_from_keycode(self, keycode, state=None):
+        """
+        This will conduct a lookup of the character or string associated with a
+        given keycode. The current keyboard modifier state will be used as a
+        default, or an appropriate state may be passed.
+        """
+        if state is None:
+            state = sum([self.shift_state, self.caps_lock_state,
+                         self.control_state, self.alt_state,
+                         self.mod2_state, self.mod3_state,
+                         self.mod4_state, self.mod5_state])
         #As far as I can tell, the python-xlib module is incomplete with regards
         #to translating keysyms to string names. Consider the XLookupString
         #method:
@@ -346,11 +384,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         #There are a few ways to address this, right now I prefer a pure Python
         #method to address the shortcomings of display.lookup_string
 
-        keysym = self.display.keycode_to_keysym(keycode,
-                                                sum([self.shift_state,
-                                                     self.caps_lock_state,
-                                                     self.control_state,
-                                                     self.alt_state]))
+        keysym = self.display.keycode_to_keysym(keycode, state)
 
         #If the character is ascii printable, return that character
         if keysym & 0x7f == keysym and self.ascii_printable(keysym):
@@ -365,6 +399,11 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
             return None
         else:
             return char
+
+    def escape(self, event):
+        if event.detail == self.lookup_character_value('Escape'):
+            return True
+        return False
 
     def get_mod_keycodes(self):
         """
