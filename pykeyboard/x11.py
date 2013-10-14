@@ -16,9 +16,10 @@
 from Xlib.display import Display
 from Xlib import X
 from Xlib.ext.xtest import fake_input
-from Xlib.XK import string_to_keysym, keysym_to_string
 from Xlib.ext import record
 from Xlib.protocol import rq
+import Xlib.XK
+
 
 from .base import PyKeyboardMeta, PyKeyboardEventMeta
 
@@ -88,8 +89,8 @@ class PyKeyboard(PyKeyboardMeta):
         else:
             if shifted:
                 fake_input(self.display, X.KeyPress, self.shift_key)
-            char_val = self.lookup_character_value(character)
-            fake_input(self.display, X.KeyPress, char_val)
+            keycode = self.lookup_character_keycode(character)
+            fake_input(self.display, X.KeyPress, keycode)
             self.display.sync()
 
     def release_key(self, character=''):
@@ -105,8 +106,8 @@ class PyKeyboard(PyKeyboardMeta):
         else:
             if shifted:
                 fake_input(self.display, X.KeyRelease, self.shift_key)
-            char_val = self.lookup_character_value(character)
-            fake_input(self.display, X.KeyRelease, char_val)
+            keycode = self.lookup_character_keycode(character)
+            fake_input(self.display, X.KeyRelease, keycode)
             self.display.sync()
 
     def special_key_assignment(self):
@@ -120,83 +121,83 @@ class PyKeyboard(PyKeyboardMeta):
         #exceptions which may come up for other OSes and vendors. Countless
         #special cases exist which are not handled here, but may be extended.
         #TTY Function Keys
-        self.backspace_key = self.lookup_character_value('BackSpace')
-        self.tab_key = self.lookup_character_value('Tab')
-        self.linefeed_key = self.lookup_character_value('Linefeed')
-        self.clear_key = self.lookup_character_value('Clear')
-        self.return_key = self.lookup_character_value('Return')
+        self.backspace_key = self.lookup_character_keycode('BackSpace')
+        self.tab_key = self.lookup_character_keycode('Tab')
+        self.linefeed_key = self.lookup_character_keycode('Linefeed')
+        self.clear_key = self.lookup_character_keycode('Clear')
+        self.return_key = self.lookup_character_keycode('Return')
         self.enter_key = self.return_key  # Because many keyboards call it "Enter"
-        self.pause_key = self.lookup_character_value('Pause')
-        self.scroll_lock_key = self.lookup_character_value('Scroll_Lock')
-        self.sys_req_key = self.lookup_character_value('Sys_Req')
-        self.escape_key = self.lookup_character_value('Escape')
-        self.delete_key = self.lookup_character_value('Delete')
+        self.pause_key = self.lookup_character_keycode('Pause')
+        self.scroll_lock_key = self.lookup_character_keycode('Scroll_Lock')
+        self.sys_req_key = self.lookup_character_keycode('Sys_Req')
+        self.escape_key = self.lookup_character_keycode('Escape')
+        self.delete_key = self.lookup_character_keycode('Delete')
         #Modifier Keys
-        self.shift_l_key = self.lookup_character_value('Shift_L')
-        self.shift_r_key = self.lookup_character_value('Shift_R')
+        self.shift_l_key = self.lookup_character_keycode('Shift_L')
+        self.shift_r_key = self.lookup_character_keycode('Shift_R')
         self.shift_key = self.shift_l_key  # Default Shift is left Shift
-        self.alt_l_key = self.lookup_character_value('Alt_L')
-        self.alt_r_key = self.lookup_character_value('Alt_R')
+        self.alt_l_key = self.lookup_character_keycode('Alt_L')
+        self.alt_r_key = self.lookup_character_keycode('Alt_R')
         self.alt_key = self.alt_l_key  # Default Alt is left Alt
-        self.control_l_key = self.lookup_character_value('Control_L')
-        self.control_r_key = self.lookup_character_value('Control_R')
+        self.control_l_key = self.lookup_character_keycode('Control_L')
+        self.control_r_key = self.lookup_character_keycode('Control_R')
         self.control_key = self.control_l_key  # Default Ctrl is left Ctrl
-        self.caps_lock_key = self.lookup_character_value('Caps_Lock')
+        self.caps_lock_key = self.lookup_character_keycode('Caps_Lock')
         self.capital_key = self.caps_lock_key  # Some may know it as Capital
-        self.shift_lock_key = self.lookup_character_value('Shift_Lock')
-        self.meta_l_key = self.lookup_character_value('Meta_L')
-        self.meta_r_key = self.lookup_character_value('Meta_R')
-        self.super_l_key = self.lookup_character_value('Super_L')
+        self.shift_lock_key = self.lookup_character_keycode('Shift_Lock')
+        self.meta_l_key = self.lookup_character_keycode('Meta_L')
+        self.meta_r_key = self.lookup_character_keycode('Meta_R')
+        self.super_l_key = self.lookup_character_keycode('Super_L')
         self.windows_l_key = self.super_l_key  # Cross-support; also it's printed there
-        self.super_r_key = self.lookup_character_value('Super_R')
+        self.super_r_key = self.lookup_character_keycode('Super_R')
         self.windows_r_key = self.super_r_key  # Cross-support; also it's printed there
-        self.hyper_l_key = self.lookup_character_value('Hyper_L')
-        self.hyper_r_key = self.lookup_character_value('Hyper_R')
+        self.hyper_l_key = self.lookup_character_keycode('Hyper_L')
+        self.hyper_r_key = self.lookup_character_keycode('Hyper_R')
         #Cursor Control and Motion
-        self.home_key = self.lookup_character_value('Home')
-        self.up_key = self.lookup_character_value('Up')
-        self.down_key = self.lookup_character_value('Down')
-        self.left_key = self.lookup_character_value('Left')
-        self.right_key = self.lookup_character_value('Right')
-        self.end_key = self.lookup_character_value('End')
-        self.begin_key = self.lookup_character_value('Begin')
-        self.page_up_key = self.lookup_character_value('Page_Up')
-        self.page_down_key = self.lookup_character_value('Page_Down')
-        self.prior_key = self.lookup_character_value('Prior')
-        self.next_key = self.lookup_character_value('Next')
+        self.home_key = self.lookup_character_keycode('Home')
+        self.up_key = self.lookup_character_keycode('Up')
+        self.down_key = self.lookup_character_keycode('Down')
+        self.left_key = self.lookup_character_keycode('Left')
+        self.right_key = self.lookup_character_keycode('Right')
+        self.end_key = self.lookup_character_keycode('End')
+        self.begin_key = self.lookup_character_keycode('Begin')
+        self.page_up_key = self.lookup_character_keycode('Page_Up')
+        self.page_down_key = self.lookup_character_keycode('Page_Down')
+        self.prior_key = self.lookup_character_keycode('Prior')
+        self.next_key = self.lookup_character_keycode('Next')
         #Misc Functions
-        self.select_key = self.lookup_character_value('Select')
-        self.print_key = self.lookup_character_value('Print')
+        self.select_key = self.lookup_character_keycode('Select')
+        self.print_key = self.lookup_character_keycode('Print')
         self.print_screen_key = self.print_key  # Seems to be the same thing
         self.snapshot_key = self.print_key  # Another name for printscreen
-        self.execute_key = self.lookup_character_value('Execute')
-        self.insert_key = self.lookup_character_value('Insert')
-        self.undo_key = self.lookup_character_value('Undo')
-        self.redo_key = self.lookup_character_value('Redo')
-        self.menu_key = self.lookup_character_value('Menu')
+        self.execute_key = self.lookup_character_keycode('Execute')
+        self.insert_key = self.lookup_character_keycode('Insert')
+        self.undo_key = self.lookup_character_keycode('Undo')
+        self.redo_key = self.lookup_character_keycode('Redo')
+        self.menu_key = self.lookup_character_keycode('Menu')
         self.apps_key = self.menu_key  # Windows...
-        self.find_key = self.lookup_character_value('Find')
-        self.cancel_key = self.lookup_character_value('Cancel')
-        self.help_key = self.lookup_character_value('Help')
-        self.break_key = self.lookup_character_value('Break')
-        self.mode_switch_key = self.lookup_character_value('Mode_switch')
-        self.script_switch_key = self.lookup_character_value('script_switch')
-        self.num_lock_key = self.lookup_character_value('Num_Lock')
+        self.find_key = self.lookup_character_keycode('Find')
+        self.cancel_key = self.lookup_character_keycode('Cancel')
+        self.help_key = self.lookup_character_keycode('Help')
+        self.break_key = self.lookup_character_keycode('Break')
+        self.mode_switch_key = self.lookup_character_keycode('Mode_switch')
+        self.script_switch_key = self.lookup_character_keycode('script_switch')
+        self.num_lock_key = self.lookup_character_keycode('Num_Lock')
         #Keypad Keys: Dictionary structure
         keypad = ['Space', 'Tab', 'Enter', 'F1', 'F2', 'F3', 'F4', 'Home',
                   'Left', 'Up', 'Right', 'Down', 'Prior', 'Page_Up', 'Next',
                   'Page_Down', 'End', 'Begin', 'Insert', 'Delete', 'Equal',
                   'Multiply', 'Add', 'Separator', 'Subtract', 'Decimal',
                   'Divide', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-        self.keypad_keys = {k: self.lookup_character_value('KP_'+str(k)) for k in keypad}
+        self.keypad_keys = {k: self.lookup_character_keycode('KP_'+str(k)) for k in keypad}
         self.numpad_keys = self.keypad_keys
         #Function Keys/ Auxilliary Keys
         #FKeys
-        self.function_keys = [None] + [self.lookup_character_value('F'+str(i)) for i in xrange(1,36)]
+        self.function_keys = [None] + [self.lookup_character_keycode('F'+str(i)) for i in xrange(1,36)]
         #LKeys
-        self.l_keys = [None] + [self.lookup_character_value('L'+str(i)) for i in xrange(1,11)]
+        self.l_keys = [None] + [self.lookup_character_keycode('L'+str(i)) for i in xrange(1,11)]
         #RKeys
-        self.r_keys = [None] + [self.lookup_character_value('R'+str(i)) for i in xrange(1,16)]
+        self.r_keys = [None] + [self.lookup_character_keycode('R'+str(i)) for i in xrange(1,16)]
 
         #Unsupported keys from windows
         self.kana_key = None
@@ -212,15 +213,16 @@ class PyKeyboard(PyKeyboardMeta):
         self.modechange_key = None
         self.sleep_key = None
 
-    def lookup_character_value(self, character):
+    def lookup_character_keycode(self, character):
         """
         Looks up the keysym for the character then returns the keycode mapping
         for that keysym.
         """
-        ch_keysym = string_to_keysym(character)
-        if ch_keysym == 0:
-            ch_keysym = string_to_keysym(special_X_keysyms[character])
-        return self.display.keysym_to_keycode(ch_keysym)
+        keysym = Xlib.XK.string_to_keysym(character)
+        if keysym == 0:
+            keysym = Xlib.XK.string_to_keysym(special_X_keysyms[character])
+        return self.display.keysym_to_keycode(keysym)
+
 
 class PyKeyboardEvent(PyKeyboardEventMeta):
     """
@@ -245,28 +247,25 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
                     'client_started': False,
                     'client_died': False,
             }])
-        self.shift_state = 0      # 0 is off :   1 is on
-        self.caps_lock_state = 0  # 0 is off :   2 is on
-        self.control_state = 0    # 0 is off :   4 is on
-        self.alt_state = 0        # 0 is off :   8 is on (same as mod1)
-        self.mod1_state = 0       # 0 is off :   8 is on
-        self.mod2_state = 0       # 0 is off :  16 is on
-        self.mod3_state = 0       # 0 is off :  32 is on
-        self.mod4_state = 0       # 0 is off :  64 is on
-        self.mod5_state = 0       # 0 is off : 128 is on
 
-        self.mod_keycodes = self.get_mod_keycodes()
+        #Set the state and map the bits to initial modifiers
+        self.state = 0
+        self.modifier_bits = {'Shift': 1, 'Caps_Lock': 2, 'Control': 4,
+                              'Mod1': 8, 'Mod2': 16, 'Mod3': 32, 'Mod4': 64,
+                              'Mod5': 128, 'Alt': 0, 'Num_Lock': 0, 'Super': 0}
 
-        #A control state variable for correct handling of Capslock
-        #self.skip_caps_release = False
+        self.modifiers = {'Shift': 0, 'Caps_Lock': 0, 'Control': 0, 'Mod1': 0,
+                          'Mod2': 0, 'Mod3': 0, 'Mod4': 0, 'Mod5': 0, 'Alt': 0,
+                          'Num_Lock': 0, 'Super': 0}
 
-        #TODO: It may be possible to dynamically detect which mod#s to map Alt and NumLock onto
-        #TODO: NumLock needs to *behave* like a lock, so the behavior for the mod# should be dynamic
-        #TODO: Figure out why translating function keys was failing with NumLock on
-        #TODO: Figure out why translating alpha keys fails to capitalize when CapsLock is on
+        #Should I add Hyper, Meta, or anything else?
 
-        self.keysym_dict = self.get_keysym_to_string_dict()
+        #Get these dictionaries for converting keysyms and strings
+        self.keysym_to_string, self.string_to_keysym = self.get_translation_dicts()
 
+        #This function will create a dictionary mapping modifiers to keycodes
+        #It will also dynamically assign named modifiers to Mod1-5 positions
+        self.configure_modifiers()
 
     def run(self):
         """Begin listening for keyboard input events."""
@@ -302,67 +301,31 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         press_bool = (event.type == X.KeyPress)
 
         #Detect modifier states from event.state
-        self.shift_state = event.state & 1
-        self.caps_lock_state = event.state & 2
-        self.control_state = event.state & 4
-        self.alt_state = event.state & 8
-        self.mod1_state = self.alt_state
-        self.mod2_state = event.state & 16
-        self.mod3_state = event.state & 32
-        self.mod4_state = event.state & 64
-        self.mod5_state = event.state & 128
+        for mod, bit in self.modifier_bits.items():
+            self.modifiers[mod] = event.state & bit
 
         #My observations suggest that lookups for the modifier keys tend to fail
         #when they are already "On", so their state will be masked
         mask = 0
-        if keycode in self.mod_keycodes['Shift']:
+        if keycode in self.modifier_keycodes['Shift']:
             mask = 1
-        #elif keycode in self.mod_keycodes['Lock']  # might not be needed
+        #elif keycode in self.modifier_keycodes['Lock']  # might not be needed
         #    mask = 2
-        elif keycode in self.mod_keycodes['Control']:
+        elif keycode in self.modifier_keycodes['Control']:
             mask = 4
-        elif keycode in self.mod_keycodes['Alt']:
+        elif keycode in self.modifier_keycodes['Mod1']:
             mask = 8
-        elif keycode in self.mod_keycodes['Mod2']:
+        elif keycode in self.modifier_keycodes['Mod2']:
             mask = 16
-        elif keycode in self.mod_keycodes['Mod3']:
+        elif keycode in self.modifier_keycodes['Mod3']:
             mask = 32
-        elif keycode in self.mod_keycodes['Mod4']:
+        elif keycode in self.modifier_keycodes['Mod4']:
             mask = 64
-        elif keycode in self.mod_keycodes['Mod5']:
+        elif keycode in self.modifier_keycodes['Mod5']:
             mask = 128
 
         character = self.lookup_char_from_keycode(keycode,
                                                   state=event.state & ~ mask)
-        #I want to just extract states from event.state, but that details the
-        #information from JUST BEFORE the key event... this complicates things
-        #Special handling to track states
-        #if keycode in self.mod_keycodes['Shift']:  # Shift state
-        #    if press_bool and not self.shift_state:
-        #        self.shift_state = 1
-        #    elif not press_bool and self.shift_state:
-        #        self.shift_state = 0
-        #if keycode in self.mod_keycodes['Lock']:  # Capslock state
-        #    if press_bool and not self.caps_lock_state:
-        #        self.caps_lock_state = 2
-        #        self.skip_caps_release = True
-        #    #Capslock state is special, two releases must occur to turn off
-        #    elif not press_bool and self.skip_caps_release:
-        #        self.skip_caps_release = False
-        #    elif not press_bool and self.caps_lock_state:
-        #        self.caps_lock_state = 0
-        #if keycode in self.mod_keycodes['Control']:  # Control state
-        #    if press_bool and not self.control_state:
-        #        self.control_state = 4
-        #    elif not press_bool and self.control_state:
-        #        self.control_state = 0
-        #if keycode in self.mod_keycodes['Alt']:  # Alt state
-        #    if press_bool and not self.alt_state:
-        #        self.alt_state = 8
-        #    elif not press_bool and self.alt_state:
-        #        self.alt_state = 0
-
-        #print(self.shift_state, self.caps_lock_state, self.control_state, self.alt_state)
 
         #All key events get passed to self.tap()
         self.tap(keycode,
@@ -389,6 +352,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         #There are a few ways to address this, right now I prefer a pure Python
         #method to address the shortcomings of display.lookup_string
 
+        #keycode_to_keysym does not work the way I thought it did...
         keysym = self.display.keycode_to_keysym(keycode, state)
 
         #If the character is ascii printable, return that character
@@ -397,7 +361,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
 
         #If the character was not printable, look for its name
         try:
-            char = self.keysym_dict[keysym]
+            char = self.keysym_to_string[keysym]
         except KeyError:
             print('Unable to determine character.')
             print('Keycode: {0} KeySym {1}'.format(keycode, keysym))
@@ -406,60 +370,100 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
             return char
 
     def escape(self, event):
-        if event.detail == self.lookup_character_value('Escape'):
+        if event.detail == self.lookup_character_keycode('Escape'):
             return True
         return False
 
-    def get_mod_keycodes(self):
+    def configure_modifiers(self):
         """
-        Detects keycodes for modifiers and parses them into a dictionary
-        for easy access.
+        This function detects and assigns the keycodes pertaining to the
+        keyboard modifiers to their names in a dictionary. This dictionary will
+        can be accessed in the following manner:
+            self.modifier_keycodes['Shift']  # All keycodes for Shift Masking
+
+        It also assigns certain named modifiers (Alt, Num_Lock, Super), which
+        may be dynamically assigned to Mod1 - Mod5 on different platforms. This
+        should generally allow the user to do the following lookups on any
+        system:
+            self.modifier_keycodes['Alt']  # All keycodes for Alt Masking
+            self.modifiers['Alt']  # State of Alt mask, non-zero if "ON"
         """
         modifier_mapping = self.display.get_modifier_mapping()
-        modifier_dict = {}
-        nti = [('Shift', X.ShiftMapIndex),
-               ('Control', X.ControlMapIndex), ('Mod1', X.Mod1MapIndex),
-               ('Alt', X.Mod1MapIndex), ('Mod2', X.Mod2MapIndex),
-               ('Mod3', X.Mod3MapIndex), ('Mod4', X.Mod4MapIndex),
-               ('Mod5', X.Mod5MapIndex), ('Lock', X.LockMapIndex)]
-        for n, i in nti:
-            modifier_dict[n] = [v for v in list(modifier_mapping[i]) if v]
-        return modifier_dict
+        mod_keycodes = {}
+        mod_index = [('Shift', X.ShiftMapIndex), ('Caps_Lock', X.LockMapIndex),
+                     ('Control', X.ControlMapIndex), ('Mod1', X.Mod1MapIndex),
+                     ('Mod2', X.Mod2MapIndex), ('Mod3', X.Mod3MapIndex),
+                     ('Mod4', X.Mod4MapIndex), ('Mod5', X.Mod5MapIndex)]
+        #This gets the list of all keycodes per Modifier, assigns to name
+        for name, index in mod_index:
+            mod_keycodes[name] = [v for v in list(modifier_mapping[index]) if v]
 
-    def lookup_character_value(self, character):
+        #Need to find out which Mod# to use for Alt, Num_Lock, and Super
+        def lookup_keycode(string):
+            keysym = self.string_to_keysym[string]
+            return self.display.keysym_to_keycode(keysym)
+
+        #List the keycodes for the named modifiers
+        alt_keycodes = [lookup_keycode(i) for i in ['Alt_L', 'Alt_R']]
+        num_lock_keycodes = [lookup_keycode('Num_Lock')]
+        super_keycodes = [lookup_keycode(i) for i in ['Super_L', 'Super_R']]
+
+        #Need to set aliases in both mod_keycodes and self.modifier_bits
+        for name, keycodes in mod_keycodes.items():
+            for alt_key in alt_keycodes:
+                if alt_key in keycodes:
+                    mod_keycodes['Alt'] = keycodes
+                    self.modifier_bits['Alt'] = self.modifier_bits[name]
+            for num_lock_key in num_lock_keycodes:
+                if num_lock_key in keycodes:
+                    mod_keycodes['Num_Lock'] = keycodes
+                    self.modifier_bits['Num_Lock'] = self.modifier_bits[name]
+            for super_key in super_keycodes:
+                if super_key in keycodes:
+                    mod_keycodes['Super'] = keycodes
+                    self.modifier_bits['Super'] = self.modifier_bits[name]
+
+        #Assign the mod_keycodes to a local variable for access
+        self.modifier_keycodes = mod_keycodes
+
+    def lookup_character_keycode(self, character):
         """
         Looks up the keysym for the character then returns the keycode mapping
         for that keysym.
         """
-        ch_keysym = string_to_keysym(character)
-        if ch_keysym == 0:
-            ch_keysym = string_to_keysym(special_X_keysyms[character])
-        return self.display.keysym_to_keycode(ch_keysym)
+        keysym = self.string_to_keysym.get(character, 0)
+        if keysym == 0:
+            keysym = self.string_to_keysym.get(special_X_keysyms[character], 0)
+        return self.display.keysym_to_keycode(keysym)
 
-    def get_keysym_to_string_dict(self):
-        keysym_dict = {}
+    def get_translation_dicts(self):
+        """
+        Returns dictionaries for the translation of keysyms to strings and from
+        strings to keysyms.
+        """
+        keysym_to_string_dict = {}
+        string_to_keysym_dict = {}
+        #XK loads latin1 and miscellany on its own; load latin2-4 and greek
+        Xlib.XK.load_keysym_group('latin2')
+        Xlib.XK.load_keysym_group('latin3')
+        Xlib.XK.load_keysym_group('latin4')
+        Xlib.XK.load_keysym_group('greek')
 
-        #Load up a dict of special character names (key=keysym, val=stringname)
-        misc = __import__('Xlib.keysymdef.miscellany',
-                          globals(), locals(), True)
-        latin1 = __import__('Xlib.keysymdef.latin1',
-                            globals(), locals(), True)
-        for module in [misc, latin1]:
-            keysyms = [n for n in module.__dict__ if n.startswith('XK_')]
-            for keysym in keysyms:
-                keysym_dict[module.__dict__[keysym]] = keysym[3:]
-        del(misc)
-        del(latin1)
-        return keysym_dict
+        #Make a standard dict and the inverted dict
+        for string, keysym in Xlib.XK.__dict__.items():
+            if string.startswith('XK_'):
+                string_to_keysym_dict[string[3:]] = keysym
+                keysym_to_string_dict[keysym] = string[3:]
+        return keysym_to_string_dict, string_to_keysym_dict
 
     def ascii_printable(self, keysym):
         """Returns False if the keysym is not a printable ascii character."""
         #Why do I have to write this, there should be a good built-in...
-        if keysym in range(9):
+        if 0 <= keysym < 9:
             return False
-        elif keysym in [11, 12]:
+        elif keysym == 11 or keysym == 12:
             return False
-        elif keysym in range(14, 32):
+        elif 13 < keysym < 32:
             return False
         elif keysym > 126:
             return False
