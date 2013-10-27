@@ -103,6 +103,7 @@ class PyMouseEvent(PyMouseEventMeta):
         self.state = False
 
     def _click(self, event):
+        import pyHook
         x, y = event.Position
 
         if event.Message == pyHook.HookConstants.WM_LBUTTONDOWN:
