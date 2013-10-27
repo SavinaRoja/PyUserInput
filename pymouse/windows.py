@@ -90,10 +90,7 @@ class PyMouseEvent(PyMouseEventMeta):
         self.hm = pyHook.HookManager()
 
     def run(self):
-        self.hm.MouseAllButtons = self._click
-        self.hm.MouseMove = self._move
-        #I think I can add scrollwheel support at some point
-        self.hm.HookMouse()
+        self.hm.MouseAll = self._action
         while self.state:
             sleep(0.01)
             pythoncom.PumpWaitingMessages()
@@ -102,11 +99,14 @@ class PyMouseEvent(PyMouseEventMeta):
         self.hm.UnhookMouse()
         self.state = False
 
-    def _click(self, event):
+    def _action(self, event):
         import pyHook
         x, y = event.Position
 
-        if event.Message == pyHook.HookConstants.WM_LBUTTONDOWN:
+        if event.Message == pyHook.HookConstants.WM_MOUSEMOVE:
+            self.move(x,y)
+
+        elif event.Message == pyHook.HookConstants.WM_LBUTTONDOWN:
             self.click(x, y, 1, True)
         elif event.Message == pyHook.HookConstants.WM_LBUTTONUP:
             self.click(x, y, 1, False)
@@ -118,9 +118,9 @@ class PyMouseEvent(PyMouseEventMeta):
             self.click(x, y, 3, True)
         elif event.Message == pyHook.HookConstants.WM_MBUTTONUP:
             self.click(x, y, 3, False)
+            
+        elif event.Message == pyHook.HookConstants.WM_MOUSEWHEEL:
+            # event.Wheel is -1 when scrolling down, 1 when scrolling up
+            self.scroll(x,y,event.Wheel)
+        
         return not self.capture
-
-    def _move(self, event):
-        x, y = event.Position
-        self.move(x, y)
-        return not self.capture_move
