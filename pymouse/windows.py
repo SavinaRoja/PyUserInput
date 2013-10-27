@@ -91,6 +91,7 @@ class PyMouseEvent(PyMouseEventMeta):
 
     def run(self):
         self.hm.MouseAll = self._action
+        self.hm.HookMouse()
         while self.state:
             sleep(0.01)
             pythoncom.PumpWaitingMessages()
