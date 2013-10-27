@@ -83,7 +83,7 @@ in Windows. This feature is only available on Mac.')
         return width, height
 
 class PyMouseEvent(PyMouseEventMeta):
-    def __init__(self, capture, capture_move):
+    def __init__(self, capture=False, capture_move=False):
         import pyHook
 
         PyMouseEventMeta.__init__(self, capture=capture, capture_move=capture_move)
