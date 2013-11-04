@@ -262,6 +262,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
 
         #Get these dictionaries for converting keysyms and strings
         self.keysym_to_string, self.string_to_keysym = self.get_translation_dicts()
+        print(self.keysym_to_string)
 
         #This function will create a dictionary mapping modifiers to keycodes
         #It will also dynamically assign named modifiers to Mod1-5 positions
@@ -304,28 +305,11 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         for mod, bit in self.modifier_bits.items():
             self.modifiers[mod] = event.state & bit
 
-        #My observations suggest that lookups for the modifier keys tend to fail
-        #when they are already "On", so their state will be masked
-        mask = 0
-        if keycode in self.modifier_keycodes['Shift']:
-            mask = 1
-        #elif keycode in self.modifier_keycodes['Lock']  # might not be needed
-        #    mask = 2
-        elif keycode in self.modifier_keycodes['Control']:
-            mask = 4
-        elif keycode in self.modifier_keycodes['Mod1']:
-            mask = 8
-        elif keycode in self.modifier_keycodes['Mod2']:
-            mask = 16
-        elif keycode in self.modifier_keycodes['Mod3']:
-            mask = 32
-        elif keycode in self.modifier_keycodes['Mod4']:
-            mask = 64
-        elif keycode in self.modifier_keycodes['Mod5']:
-            mask = 128
-
-        character = self.lookup_char_from_keycode(keycode,
-                                                  state=event.state & ~ mask)
+        if keycode in self.all_mod_keycodes:
+            character = self.display.keycode_to_keysym(keycode, 0)
+        else:
+            character = self.lookup_char_from_keycode(keycode,
+                                                      state=event.state)
 
         #All key events get passed to self.tap()
         self.tap(keycode,
@@ -338,22 +322,9 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         given keycode. The current keyboard modifier state will be used as a
         default, or an appropriate state may be passed.
         """
-        if state is None:
-            state = sum([self.shift_state, self.caps_lock_state,
-                         self.control_state, self.alt_state,
-                         self.mod2_state, self.mod3_state,
-                         self.mod4_state, self.mod5_state])
-        #As far as I can tell, the python-xlib module is incomplete with regards
-        #to translating keysyms to string names. Consider the XLookupString
-        #method:
-        #http://tronche.com/gui/x/xlib/utilities/XLookupString.html
-        #which xev uses successfully to translate special keys such as BackSpace
-        #http://xev.sourcearchive.com/documentation/1:1.0.2-0ubuntu1/xev_8c-source.html
-        #There are a few ways to address this, right now I prefer a pure Python
-        #method to address the shortcomings of display.lookup_string
 
         #keycode_to_keysym does not work the way I thought it did...
-        keysym = self.display.keycode_to_keysym(keycode, state)
+        keysym = self.display.keycode_to_keysym(keycode, 0)
 
         #If the character is ascii printable, return that character
         if keysym & 0x7f == keysym and self.ascii_printable(keysym):
@@ -389,6 +360,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
             self.modifiers['Alt']  # State of Alt mask, non-zero if "ON"
         """
         modifier_mapping = self.display.get_modifier_mapping()
+        all_mod_keycodes = []
         mod_keycodes = {}
         mod_index = [('Shift', X.ShiftMapIndex), ('Caps_Lock', X.LockMapIndex),
                      ('Control', X.ControlMapIndex), ('Mod1', X.Mod1MapIndex),
@@ -396,7 +368,9 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
                      ('Mod4', X.Mod4MapIndex), ('Mod5', X.Mod5MapIndex)]
         #This gets the list of all keycodes per Modifier, assigns to name
         for name, index in mod_index:
-            mod_keycodes[name] = [v for v in list(modifier_mapping[index]) if v]
+            codes = [v for v in list(modifier_mapping[index]) if v]
+            mod_keycodes[name] = codes
+            all_mod_keycodes += codes
 
         #Need to find out which Mod# to use for Alt, Num_Lock, and Super
         def lookup_keycode(string):
@@ -425,6 +399,8 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
 
         #Assign the mod_keycodes to a local variable for access
         self.modifier_keycodes = mod_keycodes
+
+        self.all_mod_keycodes = all_mod_keycodes
 
     def lookup_character_keycode(self, character):
         """
