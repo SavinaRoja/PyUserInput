@@ -20,7 +20,6 @@ from Xlib.ext import record
 from Xlib.protocol import rq
 import Xlib.XK
 
-
 from .base import PyKeyboardMeta, PyKeyboardEventMeta
 
 import time
@@ -249,24 +248,36 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
             }])
 
         #Set the state and map the bits to initial modifiers
+        #Those initially assigned to 0 are dynamic, and will be assigned by
+        #self.configure_keys()
         self.state = 0
-        self.modifier_bits = {'Shift': 1, 'Caps_Lock': 2, 'Control': 4,
+        self.modifier_bits = {'Shift': 1, 'Lock': 2, 'Control': 4,
                               'Mod1': 8, 'Mod2': 16, 'Mod3': 32, 'Mod4': 64,
-                              'Mod5': 128, 'Alt': 0, 'Num_Lock': 0, 'Super': 0}
+                              'Mod5': 128, 'Alt': 0, 'Num_Lock': 0, 'Super': 0,
+                              'Caps_Lock': 0, 'Shift_Lock': 0, 'Mode_switch': 0}
 
-        self.modifiers = {'Shift': 0, 'Caps_Lock': 0, 'Control': 0, 'Mod1': 0,
+        self.modifiers = {'Shift': 0, 'Lock': 0, 'Control': 0, 'Mod1': 0,
                           'Mod2': 0, 'Mod3': 0, 'Mod4': 0, 'Mod5': 0, 'Alt': 0,
-                          'Num_Lock': 0, 'Super': 0}
+                          'Num_Lock': 0, 'Super': 0, 'Caps_Lock': 0,
+                          'Shift_Lock': 0, 'Mode_switch': 0}
+
+        self.lock_meaning = None
 
         #Should I add Hyper, Meta, or anything else?
 
         #Get these dictionaries for converting keysyms and strings
         self.keysym_to_string, self.string_to_keysym = self.get_translation_dicts()
-        print(self.keysym_to_string)
 
-        #This function will create a dictionary mapping modifiers to keycodes
-        #It will also dynamically assign named modifiers to Mod1-5 positions
-        self.configure_modifiers()
+        #Identify and register special groups of keys
+        self.modifier_keycodes = {}
+        self.all_mod_keycodes = []
+        self.keypad_keycodes = []
+        self.configure_keys()
+
+        #Direct access to the display's keycode-to-keysym array
+        #print('Keycode to Keysym map')
+        #for i in range(len(self.display._keymap_codes)):
+        #    print('{0}: {1}'.format(i, self.display._keymap_codes[i]))
 
     def run(self):
         """Begin listening for keyboard input events."""
@@ -306,25 +317,51 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
             self.modifiers[mod] = event.state & bit
 
         if keycode in self.all_mod_keycodes:
-            character = self.display.keycode_to_keysym(keycode, 0)
+            keysym = self.display.keycode_to_keysym(keycode, 0)
+            character = self.keysym_to_string[keysym]
         else:
-            character = self.lookup_char_from_keycode(keycode,
-                                                      state=event.state)
+            character = self.lookup_char_from_keycode(keycode)
+
+        print(keycode, character)
 
         #All key events get passed to self.tap()
         self.tap(keycode,
                  character,
                  press=press_bool)
 
-    def lookup_char_from_keycode(self, keycode, state=None):
+    def lookup_char_from_keycode(self, keycode):
         """
         This will conduct a lookup of the character or string associated with a
-        given keycode. The current keyboard modifier state will be used as a
-        default, or an appropriate state may be passed.
+        given keycode.
         """
+        ### Getting the Keysym
+        ### Logic adapted from X11/src/KeyBind.c
+        ### Refer to XLookupString and the methods it wraps
 
-        #keycode_to_keysym does not work the way I thought it did...
-        keysym = self.display.keycode_to_keysym(keycode, 0)
+        keysym_index = 0
+        #TODO: Display's Keysyms per keycode count? Do I need this?
+        #If the Num_Lock is on, and the keycode corresponds to the keypad
+        if self.modifiers['Num_Lock'] and keycode in self.keypad_keycodes:
+            if self.modifiers['Shift'] or self.modifiers['Shift_Lock']:
+                #Shift and Shift_Lock won't cancel
+                keysym_index = 0
+            else:
+                keysym_index = 1
+        #If Shift is off, and (Lock is off or Lock is not bound)
+        elif not self.modifiers['Shift'] and not (self.modifiers['Lock'] and self.lock_meaning):
+            keysym_index = 0
+            #TODO:Check the XConvertCase condition
+        If Lock is off, or Lock does not mean Caps_Lock
+        elif not self.modifiers['Lock'] or self.lock_meaning != 'Caps_Lock':
+            #return the uppercase of index 0
+            keysym_index = 0
+        else:
+
+        if self.modifiers['Mode_switch']:
+            keysym_index += 2
+
+        #Finally! Get the keysym
+        keysym = self.display.keycode_to_keysym(keycode, keysym_index)
 
         #If the character is ascii printable, return that character
         if keysym & 0x7f == keysym and self.ascii_printable(keysym):
@@ -345,11 +382,15 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
             return True
         return False
 
-    def configure_modifiers(self):
+    def configure_keys(self):
         """
-        This function detects and assigns the keycodes pertaining to the
-        keyboard modifiers to their names in a dictionary. This dictionary will
-        can be accessed in the following manner:
+        This function locates the keycodes corresponding to special groups of
+        keys and creates data structures of them for use by the PyKeyboardEvent
+        instance; including the keypad keys and the modifiers.
+
+        The keycodes pertaining to the keyboard modifiers are assigned by the
+        modifier name in a dictionary. This dictionary can be accessed in the
+        following manner:
             self.modifier_keycodes['Shift']  # All keycodes for Shift Masking
 
         It also assigns certain named modifiers (Alt, Num_Lock, Super), which
@@ -362,7 +403,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         modifier_mapping = self.display.get_modifier_mapping()
         all_mod_keycodes = []
         mod_keycodes = {}
-        mod_index = [('Shift', X.ShiftMapIndex), ('Caps_Lock', X.LockMapIndex),
+        mod_index = [('Shift', X.ShiftMapIndex), ('Lock', X.LockMapIndex),
                      ('Control', X.ControlMapIndex), ('Mod1', X.Mod1MapIndex),
                      ('Mod2', X.Mod2MapIndex), ('Mod3', X.Mod3MapIndex),
                      ('Mod4', X.Mod4MapIndex), ('Mod5', X.Mod5MapIndex)]
@@ -372,17 +413,37 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
             mod_keycodes[name] = codes
             all_mod_keycodes += codes
 
-        #Need to find out which Mod# to use for Alt, Num_Lock, and Super
         def lookup_keycode(string):
             keysym = self.string_to_keysym[string]
             return self.display.keysym_to_keycode(keysym)
 
-        #List the keycodes for the named modifiers
-        alt_keycodes = [lookup_keycode(i) for i in ['Alt_L', 'Alt_R']]
-        num_lock_keycodes = [lookup_keycode('Num_Lock')]
-        super_keycodes = [lookup_keycode(i) for i in ['Super_L', 'Super_R']]
+        #Dynamically assign Lock to Caps_Lock, Shift_Lock, Alt, Num_Lock, Super,
+        #and mode switch. Set in both mod_keycodes and self.modifier_bits
 
-        #Need to set aliases in both mod_keycodes and self.modifier_bits
+        #Try to assign Lock to Caps_Lock or Shift_Lock
+        shift_lock_keycode = lookup_keycode('Shift_Lock')
+        caps_lock_keycode = lookup_keycode('Caps_Lock')
+
+        if shift_lock_keycode in mod_keycodes['Lock']:
+            mod_keycodes['Shift_Lock'] = [shift_lock_keycode]
+            self.modifier_bits['Shift_Lock'] = self.modifier_bits['Lock']
+            self.lock_meaning = 'Shift_Lock'
+        elif caps_lock_keycode in mod_keycodes['Lock']:
+            mod_keycodes['Caps_Lock'] = [caps_lock_keycode]
+            self.modifier_bits['Caps_Lock'] = self.modifier_bits['Lock']
+            self.lock_meaning = 'Caps_Lock'
+        else:
+            self.lock_meaning = None
+        print('Lock is bound to {0}'.format(self.lock_meaning))
+
+        #Need to find out which Mod# to use for Alt, Num_Lock, Super, and
+        #Mode_switch
+        num_lock_keycodes = [lookup_keycode('Num_Lock')]
+        alt_keycodes = [lookup_keycode(i) for i in ['Alt_L', 'Alt_R']]
+        super_keycodes = [lookup_keycode(i) for i in ['Super_L', 'Super_R']]
+        mode_switch_keycodes = [lookup_keycode('Mode_switch')]
+
+        #Detect Mod number for Alt, Num_Lock, and Super
         for name, keycodes in mod_keycodes.items():
             for alt_key in alt_keycodes:
                 if alt_key in keycodes:
@@ -396,11 +457,24 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
                 if super_key in keycodes:
                     mod_keycodes['Super'] = keycodes
                     self.modifier_bits['Super'] = self.modifier_bits[name]
+            for mode_switch_key in mode_switch_keycodes:
+                if mode_switch_key in keycodes:
+                    mod_keycodes['Mode_switch'] = keycodes
+                    self.modifier_bits['Mode_switch'] = self.modifier_bits[name]
 
         #Assign the mod_keycodes to a local variable for access
         self.modifier_keycodes = mod_keycodes
-
         self.all_mod_keycodes = all_mod_keycodes
+
+        #TODO: Determine if this might fail, perhaps iterate through the mapping and identify all keycodes with registered keypad keysyms?
+        #Acquire the full list of keypad keycodes
+        keypad = ['Space', 'Tab', 'Enter', 'F1', 'F2', 'F3', 'F4', 'Home',
+                  'Left', 'Up', 'Right', 'Down', 'Prior', 'Page_Up', 'Next',
+                  'Page_Down', 'End', 'Begin', 'Insert', 'Delete', 'Equal',
+                  'Multiply', 'Add', 'Separator', 'Subtract', 'Decimal',
+                  'Divide', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        self.keypad_keycodes = [self.lookup_character_keycode('KP_'+str(k)) for k in keypad]
+
 
     def lookup_character_keycode(self, character):
         """
