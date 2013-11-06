@@ -192,11 +192,11 @@ class PyKeyboard(PyKeyboardMeta):
         self.numpad_keys = self.keypad_keys
         #Function Keys/ Auxilliary Keys
         #FKeys
-        self.function_keys = [None] + [self.lookup_character_keycode('F'+str(i)) for i in xrange(1,36)]
+        self.function_keys = [None] + [self.lookup_character_keycode('F'+str(i)) for i in range(1,36)]
         #LKeys
-        self.l_keys = [None] + [self.lookup_character_keycode('L'+str(i)) for i in xrange(1,11)]
+        self.l_keys = [None] + [self.lookup_character_keycode('L'+str(i)) for i in range(1,11)]
         #RKeys
-        self.r_keys = [None] + [self.lookup_character_keycode('R'+str(i)) for i in xrange(1,16)]
+        self.r_keys = [None] + [self.lookup_character_keycode('R'+str(i)) for i in range(1,16)]
 
         #Unsupported keys from windows
         self.kana_key = None
@@ -453,7 +453,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         mode_switch_keycodes = [lookup_keycode('Mode_switch')]
 
         #Detect Mod number for Alt, Num_Lock, and Super
-        for name, keycodes in mod_keycodes.items():
+        for name, keycodes in list(mod_keycodes.items()):
             for alt_key in alt_keycodes:
                 if alt_key in keycodes:
                     mod_keycodes['Alt'] = keycodes

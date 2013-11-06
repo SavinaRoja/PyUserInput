@@ -36,7 +36,7 @@ class PyKeyboardMeta(object):
 
     def tap_key(self, character='', n=1, interval=0):
         """Press and release a given character key n times."""
-        for i in xrange(n):
+        for i in range(n):
             self.press_key(character)
             self.release_key(character)
             time.sleep(interval)
