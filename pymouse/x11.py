@@ -133,6 +133,7 @@ class PyMouseEvent(PyMouseEventMeta):
             self.stop()
 
     def stop(self):
+        self.state = False
         self.display.flush()
         self.display.record_disable_context(self.ctx)
         self.display.ungrab_pointer(X.CurrentTime)
