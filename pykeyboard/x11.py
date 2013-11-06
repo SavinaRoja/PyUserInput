@@ -322,8 +322,6 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         else:
             character = self.lookup_char_from_keycode(keycode)
 
-        print(keycode, character)
-
         #All key events get passed to self.tap()
         self.tap(keycode,
                  character,
@@ -334,28 +332,39 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         This will conduct a lookup of the character or string associated with a
         given keycode.
         """
-        ### Getting the Keysym
-        ### Logic adapted from X11/src/KeyBind.c
-        ### Refer to XLookupString and the methods it wraps
+
+        #TODO: Logic should be strictly adapted from X11's src/KeyBind.c
+        #Right now the logic is based off of
+        #http://tronche.com/gui/x/xlib/input/keyboard-encoding.html
+        #Which I suspect is not the whole story and may likely cause bugs
 
         keysym_index = 0
         #TODO: Display's Keysyms per keycode count? Do I need this?
         #If the Num_Lock is on, and the keycode corresponds to the keypad
         if self.modifiers['Num_Lock'] and keycode in self.keypad_keycodes:
             if self.modifiers['Shift'] or self.modifiers['Shift_Lock']:
-                #Shift and Shift_Lock won't cancel
                 keysym_index = 0
             else:
                 keysym_index = 1
-        #If Shift is off, and (Lock is off or Lock is not bound)
-        elif not self.modifiers['Shift'] and not (self.modifiers['Lock'] and self.lock_meaning):
+
+        elif not self.modifiers['Shift'] and self.modifiers['Caps_Lock']:
+            #Use the first keysym if uppercase or uncased
+            #Use the uppercase keysym if the first is lowercase (second)
             keysym_index = 0
-            #TODO:Check the XConvertCase condition
-        If Lock is off, or Lock does not mean Caps_Lock
-        elif not self.modifiers['Lock'] or self.lock_meaning != 'Caps_Lock':
-            #return the uppercase of index 0
-            keysym_index = 0
-        else:
+            keysym = self.display.keycode_to_keysym(keycode, keysym_index)
+            #TODO: Support Unicode, Greek, and special latin characters
+            if keysym & 0x7f == keysym and chr(keysym) in 'abcdefghijklmnopqrstuvwxyz':
+                keysym_index = 1
+
+        elif self.modifiers['Shift'] and self.modifiers['Caps_Lock']:
+            keysym_index = 1
+            keysym = self.display.keycode_to_keysym(keycode, keysym_index)
+            #TODO: Support Unicode, Greek, and special latin characters
+            if keysym & 0x7f == keysym and chr(keysym) in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
+                keysym_index = 0
+
+        elif self.modifiers['Shift'] or self.modifiers['Shift_Lock']:
+            keysym_index = 1
 
         if self.modifiers['Mode_switch']:
             keysym_index += 2
