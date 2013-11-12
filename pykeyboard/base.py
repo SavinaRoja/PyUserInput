@@ -42,10 +42,34 @@ class PyKeyboardMeta(object):
             time.sleep(interval)
 
     def type_string(self, char_string, interval=0):
-        """A convenience method for typing longer strings of characters."""
-        for i in char_string:
-            time.sleep(interval)
-            self.tap_key(i)
+        """
+        A convenience method for typing longer strings of characters. Generates
+        as few Shift events as possible."""
+        shift = False
+        for char in char_string:
+            if self.is_char_shifted(char):
+                if not shift:  # Only press Shift as needed
+                    time.sleep(interval)
+                    self.press_key(self.shift_key)
+                    shift = True
+                #In order to avoid tap_key pressing Shift, we need to pass the
+                #unshifted form of the character
+                if char in '<>?:"{}|~!@#$%^&*()_+':
+                    ch_index = '<>?:"{}|~!@#$%^&*()_+'.index(char)
+                    unshifted_char = ",./;'[]\\`1234567890-="[ch_index]
+                else:
+                    unshifted_char = char.lower()
+                time.sleep(interval)
+                self.tap_key(unshifted_char)
+            else:  # Unshifted already
+                if shift and char != ' ':  # Only release Shift as needed
+                    self.release_key(self.shift_key)
+                    shift = False
+                time.sleep(interval)
+                self.tap_key(char)
+
+        if shift:  # Turn off Shift if it's still ON
+            self.release_key(self.shift_key)
 
     def special_key_assignment(self):
         """Makes special keys more accessible."""
