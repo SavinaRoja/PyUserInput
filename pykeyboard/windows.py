@@ -231,6 +231,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         self.hc = pyHook.HookConstants()
         self.shift_state = 0  # 0 is off, 1 is on
         self.alt_state = 0  # 0 is off, 2 is on
+        #TODO: A much larger range of modifier states shall be implemented
 
     def run(self):
         """Begin listening for keyboard input events."""
@@ -246,21 +247,24 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         self.hm.UnhookKeyboard()
         self.state = False
 
-    def handler(self, reply):
+    def handler(self, event):
         """Upper level handler of keyboard events."""
-        if reply.Message == self.hc.WM_KEYDOWN:
-            self._key_press(reply)
-        elif reply.Message == self.hc.WM_KEYUP:
-            self._key_release(reply)
-        elif reply.Message == self.hc.WM_SYSKEYDOWN:
-            self._key_press(reply)
-        elif reply.Message == self.hc.WM_SYSKEYUP:
-            self._key_release(reply)
-        else:
-            print('Keyboard event message unhandled: {0}'.format(reply.Message))
-        return not self.capture
 
-    def _key_press(self, event):
+        if self.escape(event):  # A chance to escape
+            self.stop()
+        else:
+            self._tap(event)
+
+    def _tap(self, event):
+        keycode = event.keyID
+        press_bool = (event.Message in [self.hc.WM_KEYDOWN, self.hc.WM_SYSKEYDOWN])
+        #TODO: What is the full spectrum of Message values?
+
+        self.tap(keycode, event.GetKey(), press_bool)
+        #TODO: event.GetKey() is just filler at the moment, modifier states and
+        #thorough character/key conversion need to be implemented
+
+    def _key_press(self, event):  #This will be removed later
         if self.escape_code(event):  #Quit if this returns True
             self.stop()
         if event.GetKey() in ['Shift', 'Lshift', 'Rshift', 'Capital']:
@@ -278,7 +282,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         #print('KeyID: {0}'.format(event.KeyID))  # Virtual key code, int
         #print('ScanCode: {0}'.format(event.ScanCode))  # Scan code, int
 
-    def _key_release(self, event):
+    def _key_release(self, event):  # This will be removed later
         if event.GetKey() in ['Shift', 'Lshift', 'Rshift', 'Capital']:
             self.toggle_shift_state()
         if event.GetKey() in ['Menu', 'Lmenu', 'Rmenu']:
@@ -294,17 +298,15 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         #print('KeyID: {0}'.format(event.KeyID))  # Virtual key code, int
         #print('ScanCode: {0}'.format(event.ScanCode))  # Scan code, int
 
-    def escape_code(self, event):
-        if event.KeyID == VK_ESCAPE:
-            return True
-        return False
+    def escape(self, event):
+        return event.KeyID == VK_Escape
 
-    def toggle_shift_state(self):
+    def toggle_shift_state(self):  # This will be removed later
         '''Does toggling for the shift state.'''
         states = [1, 0]
         self.shift_state = states[self.shift_state]
 
-    def toggle_alt_state(self):
+    def toggle_alt_state(self):  # This will be removed later
         '''Does toggling for the alt state.'''
         states = [2, None, 0]
         self.alt_state = states[self.alt_state]
