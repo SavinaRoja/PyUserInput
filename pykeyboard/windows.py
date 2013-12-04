@@ -254,9 +254,11 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
             self.stop()
         else:
             self._tap(event)
+        #This is needed according to the pyHook tutorials 'http://sourceforge.net/apps/mediawiki/pyhook/index.php?title=PyHook_Tutorial'
+        return True
 
     def _tap(self, event):
-        keycode = event.keyID
+        keycode = event.KeyID
         press_bool = (event.Message in [self.hc.WM_KEYDOWN, self.hc.WM_SYSKEYDOWN])
         #TODO: What is the full spectrum of Message values?
 
@@ -265,7 +267,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         #thorough character/key conversion need to be implemented
 
     def _key_press(self, event):  #This will be removed later
-        if self.escape_code(event):  #Quit if this returns True
+        if self.escape(event):  #Quit if this returns True
             self.stop()
         if event.GetKey() in ['Shift', 'Lshift', 'Rshift', 'Capital']:
             self.toggle_shift_state()
@@ -299,7 +301,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         #print('ScanCode: {0}'.format(event.ScanCode))  # Scan code, int
 
     def escape(self, event):
-        return event.KeyID == VK_Escape
+        return event.KeyID == VK_ESCAPE
 
     def toggle_shift_state(self):  # This will be removed later
         '''Does toggling for the shift state.'''
