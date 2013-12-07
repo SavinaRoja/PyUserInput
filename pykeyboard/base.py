@@ -21,6 +21,7 @@ framework to be extended by each platform.
 import time
 from threading import Thread
 
+
 class PyKeyboardMeta(object):
     """
     The base class for PyKeyboard. Represents basic operational model.
@@ -90,15 +91,62 @@ class PyKeyboardMeta(object):
             return True
         return False
 
+
 class PyKeyboardEventMeta(Thread):
     """
     The base class for PyKeyboard. Represents basic operational model.
     """
+
+    #One of the most variable components of keyboards throughout history and
+    #across manufacturers is the Modifier Key...
+    #I am attempting to cover a lot of bases to make using PyKeyboardEvent
+    #simpler, without digging a bunch of traps for incompatibilities between
+    #platforms.
+
+    #Keeping track of the keyboard's state is not only generally necessary to
+    #correctly interpret character identities in keyboard events, but should
+    #also enable a user to easily query modifier states without worrying about
+    #chaining event triggers for mod-combinations
+
+    #The keyboard's state will be represented by an integer, the individual
+    #mod keys by a bit mask of that integer
+    state = 0
+
+    #Each platform should assign, where applicable/possible, the bit masks for
+    #modifier keys initially set to 0 here. Not all modifiers are recommended
+    #for cross-platform use
+    modifier_bits = {'Shift': 1,
+                     'Lock': 2,
+                     'Control': 4,
+                     'Mod1': 8,  # X11 dynamic assignment
+                     'Mod2': 16,  # X11 dynamic assignment
+                     'Mod3': 32,  # X11 dynamic assignment
+                     'Mod4': 64,  # X11 dynamic assignment
+                     'Mod5': 128,  # X11 dynamic assignment
+                     'Alt': 0,
+                     'AltGr': 0,  # Uncommon
+                     'Caps_Lock': 0,
+                     'Command': 0,  # Mac key without generic equivalent
+                     'Function': 0,  # Not advised; typically undetectable
+                     'Hyper': 0,  # Uncommon?
+                     'Meta': 0,  # Uncommon?
+                     'Num_Lock': 0,
+                     'Mode_switch': 0,  # Uncommon
+                     'Shift_Lock': 0,  # Uncommon
+                     'Super': 0,  # X11 key, sometimes equivalent to Windows
+                     'Windows': 0}  # Windows key, sometimes equivalent to Super
+
+    #Make the modifiers dictionary for individual states, setting all to off
+    modifiers = {}
+    for key in modifier_bits.keys():
+        modifiers[key] = False
+
     def __init__(self, capture=False):
         Thread.__init__(self)
         self.daemon = True
         self.capture = capture
         self.state = True
+        self.configure_keys()
 
     def run(self):
         self.state = True
