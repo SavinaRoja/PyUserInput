@@ -182,3 +182,11 @@ class PyKeyboardEventMeta(Thread):
         """
         condition = None
         return event == condition
+
+    def configure_keys(self):
+        """
+        Does per-platform work of configuring the modifier keys as well as data
+        structures for simplified key access. Does nothing in this base
+        implementation.
+        """
+        pass
