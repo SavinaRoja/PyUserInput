@@ -229,9 +229,8 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         PyKeyboardEventMeta.__init__(self)
         self.hm = pyHook.HookManager()
         self.hc = pyHook.HookConstants()
-        self.shift_state = 0  # 0 is off, 1 is on
-        self.alt_state = 0  # 0 is off, 2 is on
-        #TODO: A much larger range of modifier states shall be implemented
+
+        self.lock_meaning = None
 
     def run(self):
         """Begin listening for keyboard input events."""
