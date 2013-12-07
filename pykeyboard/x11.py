@@ -247,23 +247,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
                     'client_died': False,
             }])
 
-        #Set the state and map the bits to initial modifiers
-        #Those initially assigned to 0 are dynamic, and will be assigned by
-        #self.configure_keys()
-        self.state = 0
-        self.modifier_bits = {'Shift': 1, 'Lock': 2, 'Control': 4,
-                              'Mod1': 8, 'Mod2': 16, 'Mod3': 32, 'Mod4': 64,
-                              'Mod5': 128, 'Alt': 0, 'Num_Lock': 0, 'Super': 0,
-                              'Caps_Lock': 0, 'Shift_Lock': 0, 'Mode_switch': 0}
-
-        self.modifiers = {'Shift': 0, 'Lock': 0, 'Control': 0, 'Mod1': 0,
-                          'Mod2': 0, 'Mod3': 0, 'Mod4': 0, 'Mod5': 0, 'Alt': 0,
-                          'Num_Lock': 0, 'Super': 0, 'Caps_Lock': 0,
-                          'Shift_Lock': 0, 'Mode_switch': 0}
-
         self.lock_meaning = None
-
-        #Should I add Hyper, Meta, or anything else?
 
         #Get these dictionaries for converting keysyms and strings
         self.keysym_to_string, self.string_to_keysym = self.get_translation_dicts()
@@ -475,15 +459,19 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         self.modifier_keycodes = mod_keycodes
         self.all_mod_keycodes = all_mod_keycodes
 
-        #TODO: Determine if this might fail, perhaps iterate through the mapping and identify all keycodes with registered keypad keysyms?
+        #TODO: Determine if this might fail, perhaps iterate through the mapping
+        #and identify all keycodes with registered keypad keysyms?
+
         #Acquire the full list of keypad keycodes
+        self.keypad_keycodes = []
         keypad = ['Space', 'Tab', 'Enter', 'F1', 'F2', 'F3', 'F4', 'Home',
                   'Left', 'Up', 'Right', 'Down', 'Prior', 'Page_Up', 'Next',
                   'Page_Down', 'End', 'Begin', 'Insert', 'Delete', 'Equal',
                   'Multiply', 'Add', 'Separator', 'Subtract', 'Decimal',
-                  'Divide', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-        self.keypad_keycodes = [self.lookup_character_keycode('KP_'+str(k)) for k in keypad]
-
+                  'Divide', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+        for keyname in keypad:
+            keypad_keycode = self.lookup_character_keycode('KP_' + keyname)
+            self.keypad_keycodes.append(keypad_keycode)
 
     def lookup_character_keycode(self, character):
         """
