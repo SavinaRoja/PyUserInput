@@ -22,6 +22,7 @@ from .base import PyKeyboardMeta, PyKeyboardEventMeta
 
 import time
 
+
 class SupportError(Exception):
     """For keys not supported on this system"""
     def __init__(self, value):
@@ -29,6 +30,7 @@ class SupportError(Exception):
 
     def __str__(self):
         return('The {0} key is not supported in Windows'.format(self.value))
+
 
 class PyKeyboard(PyKeyboardMeta):
     """
@@ -177,7 +179,7 @@ class PyKeyboard(PyKeyboardMeta):
                               VK_F13, VK_F14, VK_F15, VK_F16, VK_F17, VK_F18,
                               VK_F19, VK_F20, VK_F21, VK_F22, VK_F23, VK_F24,
                               None, None, None, None, None, None, None, None,
-                              None, None, None]  #Up to 36 as in x11
+                              None, None, None]  # Up to 36 as in x11
         #Miscellaneous
         self.cancel_key = VK_CANCEL
         self.break_key = self.cancel_key
@@ -223,7 +225,9 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
     The PyKeyboardEvent implementation for Windows Systems. This allows one
     to listen for keyboard input.
     """
-    def __init__(self):
+    def __init__(self, diagnostic=False):
+        self.diagnostic = diagnostic
+
         import pyHook
 
         PyKeyboardEventMeta.__init__(self)
@@ -251,6 +255,8 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
 
         if self.escape(event):  # A chance to escape
             self.stop()
+        elif self.diagnostic:
+            self._diagnostic(event)
         else:
             self._tap(event)
         #This is needed according to the pyHook tutorials 'http://sourceforge.net/apps/mediawiki/pyhook/index.php?title=PyHook_Tutorial'
@@ -259,45 +265,40 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
     def _tap(self, event):
         keycode = event.KeyID
         press_bool = (event.Message in [self.hc.WM_KEYDOWN, self.hc.WM_SYSKEYDOWN])
-        #TODO: What is the full spectrum of Message values?
 
-        self.tap(keycode, event.GetKey(), press_bool)
-        #TODO: event.GetKey() is just filler at the moment, modifier states and
-        #thorough character/key conversion need to be implemented
+        #Not using event.GeyKey() because we want to differentiate between
+        #KeyID and Ascii attributes of the event
+        if event.Ascii != 0:
+            character = chr(event.Ascii)
+        else:
+            character = self.hc.id_to_vk[keycode][3:]
 
-    def _key_press(self, event):  #This will be removed later
-        if self.escape(event):  #Quit if this returns True
-            self.stop()
-        if event.GetKey() in ['Shift', 'Lshift', 'Rshift', 'Capital']:
-            self.toggle_shift_state()
-        if event.GetKey() in ['Menu', 'Lmenu', 'Rmenu']:
-            self.toggle_alt_state()
-        self.key_press(event)
-        #print('Key Pressed!')
-        #print('GetKey: {0}'.format(event.GetKey()))  # Name of the virtual keycode, str
-        #print('IsAlt: {0}'.format(event.IsAlt()))  # Was the alt key depressed?, bool
-        #print('IsExtended: {0}'.format(event.IsExtended()))  # Is this an extended key?, bool
-        #print('IsInjected: {0}'.format(event.IsInjected()))  # Was this event generated programmatically?, bool
-        #print('IsTransition: {0}'.format(event.IsTransition()))  #Is this a transition from up to down or vice versa?, bool
-        #print('ASCII: {0}'.format(event.Ascii))  # ASCII value, if one exists, str
-        #print('KeyID: {0}'.format(event.KeyID))  # Virtual key code, int
-        #print('ScanCode: {0}'.format(event.ScanCode))  # Scan code, int
+        #TODO: Need to universalize keys between platforms. ie. 'Menu' -> 'Alt'
 
-    def _key_release(self, event):  # This will be removed later
-        if event.GetKey() in ['Shift', 'Lshift', 'Rshift', 'Capital']:
-            self.toggle_shift_state()
-        if event.GetKey() in ['Menu', 'Lmenu', 'Rmenu']:
-            self.toggle_alt_state()
-        self.key_release(event)
-        #print('Key Released!')
-        #print('GetKey: {0}'.format(event.GetKey()))  # Name of the virtual keycode, str
-        #print('IsAlt: {0}'.format(event.IsAlt()))  # Was the alt key depressed?, bool
-        #print('IsExtended: {0}'.format(event.IsExtended()))  # Is this an extended key?, bool
-        #print('IsInjected: {0}'.format(event.IsInjected()))  # Was this event generated programmatically?, bool
-        #print('IsTransition: {0}'.format(event.IsTransition()))  #Is this a transition from up to down or vice versa?, bool
-        #print('ASCII: {0}'.format(event.Ascii))  # ASCII value, if one exists, str
-        #print('KeyID: {0}'.format(event.KeyID))  # Virtual key code, int
-        #print('ScanCode: {0}'.format(event.ScanCode))  # Scan code, int
+        self.tap(keycode, character, press_bool)
+
+    def _diagnostic(self, event):
+        """
+        This method is employed instead of _tap() if the PyKeyboardEvent is
+        initialized with diagnostic=True. This makes some basic testing quickly
+        and easily available. It will print out information regarding the event
+        instead of passing information along to self.tap()
+        """
+        print('\n---Keyboard Event Diagnostic---')
+        print('MessageName:', event.MessageName)
+        print('Message:', event.Message)
+        print('Time:', event.Time)
+        print('Window:', event.Window)
+        print('WindowName:', event.WindowName)
+        print('Ascii:', event.Ascii, ',', chr(event.Ascii))
+        print('Key:', event.Key)
+        print('KeyID:', event.KeyID)
+        print('ScanCode:', event.ScanCode)
+        print('Extended:', event.Extended)
+        print('Injected:', event.Injected)
+        print('Alt', event.Alt)
+        print('Transition', event.Transition)
+        print('---')
 
     def escape(self, event):
         return event.KeyID == VK_ESCAPE
@@ -311,3 +312,10 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         '''Does toggling for the alt state.'''
         states = [2, None, 0]
         self.alt_state = states[self.alt_state]
+
+    def configure_keys(self):
+        """
+        This does initial configuration for keyboard modifier state tracking
+        including alias setting and keycode list construction.
+        """
+        pass
