@@ -103,7 +103,7 @@ class PyKeyboardEventMeta(Thread):
     #simpler, without digging a bunch of traps for incompatibilities between
     #platforms.
 
-    #Keeping track of the keyboard's state is not only generally necessary to
+    #Keeping track of the keyboard's state is not only necessary at times to
     #correctly interpret character identities in keyboard events, but should
     #also enable a user to easily query modifier states without worrying about
     #chaining event triggers for mod-combinations
