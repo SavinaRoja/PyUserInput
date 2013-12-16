@@ -229,7 +229,6 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
     allows one to listen for keyboard input.
     """
     def __init__(self, display=None):
-        PyKeyboardEventMeta.__init__(self)
         self.display = Display(display)
         self.display2 = Display(display)
         self.ctx = self.display2.record_create_context(
@@ -256,12 +255,14 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         self.modifier_keycodes = {}
         self.all_mod_keycodes = []
         self.keypad_keycodes = []
-        self.configure_keys()
+        #self.configure_keys()
 
         #Direct access to the display's keycode-to-keysym array
         #print('Keycode to Keysym map')
         #for i in range(len(self.display._keymap_codes)):
         #    print('{0}: {1}'.format(i, self.display._keymap_codes[i]))
+
+        PyKeyboardEventMeta.__init__(self)
 
     def run(self):
         """Begin listening for keyboard input events."""
