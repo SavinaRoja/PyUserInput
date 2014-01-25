@@ -429,7 +429,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
             self.lock_meaning = 'Caps_Lock'
         else:
             self.lock_meaning = None
-        print('Lock is bound to {0}'.format(self.lock_meaning))
+        #print('Lock is bound to {0}'.format(self.lock_meaning))
 
         #Need to find out which Mod# to use for Alt, Num_Lock, Super, and
         #Mode_switch
