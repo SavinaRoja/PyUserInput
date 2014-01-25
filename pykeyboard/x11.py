@@ -23,6 +23,7 @@ import Xlib.XK
 from .base import PyKeyboardMeta, PyKeyboardEventMeta
 
 import time
+import string
 
 special_X_keysyms = {
     ' ': "space",
@@ -505,11 +506,14 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         return keysym_to_string_dict, string_to_keysym_dict
 
     def ascii_printable(self, keysym):
-        """Returns False if the keysym is not a printable ascii character."""
-        #Why do I have to write this, there should be a good built-in...
+        """
+        If the keysym corresponds to a non-printable ascii character this will
+        return False. If it is printable, then True will be returned.
+
+        ascii 11 (vertical tab) and ascii 12 are printable, chr(11) and chr(12)
+        will return '\x0b' and '\x0c' respectively.
+        """
         if 0 <= keysym < 9:
-            return False
-        elif keysym == 11 or keysym == 12:
             return False
         elif 13 < keysym < 32:
             return False
