@@ -71,7 +71,20 @@ character_translate_table = {
     ' ': 0x31,
     '\r': 0x24,
     '\t': 0x30,
-    'shift': 0x38
+    'return' = 0x24,
+    'tab' = 0x30,
+    'space' = 0x31,
+    'delete' = 0x33,
+    'escape' = 0x35,
+    'command' = 0x37,
+    'shift' = 0x38,
+    'capslock' = 0x39,
+    'option' = 0x3A,
+    'control' = 0x3B,
+    'rightshift' = 0x3C,
+    'rightoption' = 0x3D,
+    'rightcontrol' = 0x3E,
+    'function' = 0x3F,
 }
 
 # Taken from ev_keymap.h
