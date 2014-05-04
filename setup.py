@@ -1,9 +1,15 @@
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
+import os
 import sys
 
+
 def long_description():
-    with open('README.md', 'r') as readme:
-        readme_text = readme.read()
+    readme = os.path.join(os.path.dirname(__file__), 'README.md')
+    with open(readme, 'r') as inf:
+        readme_text = inf.read()
     return(readme_text)
 
 setup(name='PyUserInput',
@@ -14,6 +20,7 @@ setup(name='PyUserInput',
       #Original author of PyMouse: Pepijn de Vos
       author_email='pablo.barton@gmail.com',
       url='https://github.com/SavinaRoja/PyUserInput',
+      package_dir = {'': '.'},
       packages = ['pykeyboard', 'pymouse'],
       license='http://www.gnu.org/licenses/gpl-3.0.html',
       keywords='mouse,keyboard user input event',
