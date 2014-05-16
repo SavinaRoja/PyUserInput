@@ -70,7 +70,10 @@ in X11. This feature is only available on Mac.')
             self.display.sync()
 
     def drag(self, x, y):
-        self.move(x, y)
+        fake_input(self.display, X.ButtonPress, button_ids[1])
+        fake_input(self.display, X.MotionNotify, x=x, y=y)
+        fake_input(self.display, X.ButtonRelease, button_ids[1])
+        self.display.sync()
 
     def position(self):
         coord = self.display.screen().root.query_pointer()._data
