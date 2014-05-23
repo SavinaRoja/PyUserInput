@@ -70,7 +70,9 @@ in Windows. This feature is only available on Mac.')
         windll.user32.SetCursorPos(x, y)
 
     def drag(self, x, y):
-        self.move(x, y)
+        self.press(*m.position())
+        #self.move(x, y)
+        self.release(x, y)
 
     def position(self):
         pt = POINT()
