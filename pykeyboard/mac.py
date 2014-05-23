@@ -71,20 +71,21 @@ character_translate_table = {
     ' ': 0x31,
     '\r': 0x24,
     '\t': 0x30,
-    'return' = 0x24,
-    'tab' = 0x30,
-    'space' = 0x31,
-    'delete' = 0x33,
-    'escape' = 0x35,
-    'command' = 0x37,
-    'shift' = 0x38,
-    'capslock' = 0x39,
-    'option' = 0x3A,
-    'control' = 0x3B,
-    'rightshift' = 0x3C,
-    'rightoption' = 0x3D,
-    'rightcontrol' = 0x3E,
-    'function' = 0x3F,
+    '\n': 0x24,
+    'return' : 0x24,
+    'tab' : 0x30,
+    'space' : 0x31,
+    'delete' : 0x33,
+    'escape' : 0x35,
+    'command' : 0x37,
+    'shift' : 0x38,
+    'capslock' : 0x39,
+    'option' : 0x3A,
+    'control' : 0x3B,
+    'rightshift' : 0x3C,
+    'rightoption' : 0x3D,
+    'rightcontrol' : 0x3E,
+    'function' : 0x3F,
 }
 
 # Taken from ev_keymap.h
@@ -117,6 +118,10 @@ special_key_translate_table = {
 }
 
 class PyKeyboard(PyKeyboardMeta):
+
+    def __init__(self):
+      self.shift_key = 'shift'
+      
     def press_key(self, key):
         if key in special_key_translate_table:
             self._press_special_key(key, True)
@@ -141,22 +146,12 @@ class PyKeyboard(PyKeyboardMeta):
 
     def _press_normal_key(self, key, down):
         try:
-            if self.is_char_shifted(key):
-                key_code = character_translate_table[key.lower()]
-
-                event = CGEventCreateKeyboardEvent(None, 
-                            character_translate_table['shift'], down)
-                CGEventPost(kCGHIDEventTap, event)
-                # Tiny sleep to let OS X catch up on us pressing shift
-                time.sleep(.01)
-
-            else:
-                key_code = character_translate_table[key]
-
+            key_code = character_translate_table[key.lower()]
 
             event = CGEventCreateKeyboardEvent(None, key_code, down)
             CGEventPost(kCGHIDEventTap, event)
-
+            if key.lower() == "shift":
+              time.sleep(.1)
 
         except KeyError:
             raise RuntimeError("Key {} not implemented.".format(key))
