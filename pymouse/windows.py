@@ -78,8 +78,12 @@ in Windows. This feature is only available on Mac.')
         return pt.x, pt.y
 
     def screen_size(self):
-        width = windll.user32.GetSystemMetrics(0)
-        height = windll.user32.GetSystemMetrics(1)
+        if windll.user32.GetSystemMetrics(80) == 1:
+            width = windll.user32.GetSystemMetrics(0)
+            height = windll.user32.GetSystemMetrics(1)
+        else:
+            width = windll.user32.GetSystemMetrics(78)
+            height = windll.user32.GetSystemMetrics(79)
         return width, height
 
 class PyMouseEvent(PyMouseEventMeta):
