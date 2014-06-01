@@ -81,6 +81,7 @@ character_translate_table = {
     'shift' : 0x38,
     'capslock' : 0x39,
     'option' : 0x3A,
+    'alternate' : 0x3A,
     'control' : 0x3B,
     'rightshift' : 0x3C,
     'rightoption' : 0x3D,
@@ -122,7 +123,7 @@ class PyKeyboard(PyKeyboardMeta):
 
     def __init__(self):
       self.shift_key = 'shift'
-      self.modifier_table = {'Shift':False,'Command':False,'Control':False,'Alternative':False}
+      self.modifier_table = {'Shift':False,'Command':False,'Control':False,'Alternate':False}
         
     def press_key(self, key):
         if key.title() in self.modifier_table: 
@@ -157,9 +158,12 @@ class PyKeyboard(PyKeyboardMeta):
             key_code = character_translate_table[key.lower()]
             # kCGEventFlagMaskAlternate | kCGEventFlagMaskCommand | kCGEventFlagMaskControl | kCGEventFlagMaskShift
             event = CGEventCreateKeyboardEvent(None, key_code, down)
+            mkeyStr = ''
             for mkey in self.modifier_table:
                 if self.modifier_table[mkey]:
-                    eval('CGEventSetFlags(event, kCGEventFlagMask'+mkey+')')
+                    if len(mkeyStr)>1: mkeyStr = mkeyStr+' ^ '
+                    mkeyStr = mkeyStr+'kCGEventFlagMask'+mkey                    
+            if len(mkeyStr)>1: eval('CGEventSetFlags(event, '+mkeyStr+')')
             CGEventPost(kCGHIDEventTap, event)
             if key.lower() == "shift":
               time.sleep(.1)
