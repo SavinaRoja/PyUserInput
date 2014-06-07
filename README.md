@@ -39,7 +39,7 @@ Here's an example of clicking the center of the screen and typing "Hello, World!
     m.click(x_dim/2, y_dim/2, 1)
     k.type_string('Hello, World!')
 
-PyKeyboard allows for a range of ways for sending keystrokes; 
+PyKeyboard allows for a range of ways for sending keystrokes:
 
     # pressing a key
     k.press_key('H')
@@ -53,7 +53,7 @@ PyKeyboard allows for a range of ways for sending keystrokes;
     k.type_string('o World!')
     
 
-and it supports a wide range of special keys.
+and it supports a wide range of special keys:
 
     #Create an Alt+Tab combo
     k.press_key(k.alt_key)
