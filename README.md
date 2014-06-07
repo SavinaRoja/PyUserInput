@@ -50,6 +50,13 @@ PyKeyboard supports a wide range of special keys.
     k.tap_key(k.numpad_keys['Home'])  # Tap 'Home' on the numpad
     k.tap_key(k.numpad_keys[5], n=3)  # Tap 5 on the numpad, thrice
 
+Note you can also send multiple keystrokes together (e.g. when accessing a keyboard shortcut) using the press_keys method:
+
+    # Mac example
+    k.press_keys(['Command','shift','3'])
+    # Windows example
+    k.press_keys([k.windows_l_key,'d'])
+
 Consistency between platforms is a big challenge; I should create better documentation
 for this. Meanwhile, aside from browsing the source, the following tools will go a
 long way in showing you what is available:
