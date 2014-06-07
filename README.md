@@ -71,14 +71,12 @@ Note you can also send multiple keystrokes together (e.g. when accessing a keybo
     # Windows example
     k.press_keys([k.windows_l_key,'d'])
 
-Consistency between platforms is a big challenge; I should create better documentation
-for this. Meanwhile, aside from browsing the source, the following tools will go a
-long way in showing you what is available:
+Consistency between platforms is a big challenge; Please look at the source for the operating system that you are using to help understand the format of the keys that you would need to send. For example:
 
-    #If a key value is 0 or None, it's probably not supported on your platform
-    dir(k)  #Use dir() on a PyKeyboard instance
-    k.numpad_keys.viewkeys()
-    k.function_keys
+    # Windows
+    k.tap_key(k.alt_key)
+    # Mac
+    k.tap_key('Alt)
 
 I'd like to make a special note about using PyMouseEvent and PyKeyboardEvent.
 These objects are a framework for listening for mouse and keyboard input; they
