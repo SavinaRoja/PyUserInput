@@ -39,7 +39,21 @@ Here's an example of clicking the center of the screen and typing "Hello, World!
     m.click(x_dim/2, y_dim/2, 1)
     k.type_string('Hello, World!')
 
-PyKeyboard supports a wide range of special keys.
+PyKeyboard allows for a range of ways for sending keystrokes; 
+
+    # pressing a key
+    k.press_key('H')
+    # which you then follow with a release of the key
+    k.release_key('H')
+    # or you can 'tap' a key which does both
+    k.tap_key('e')
+    # note that that key does support a way of repeating keystrokes with a interval time between each
+    k.tap_key('l',n=2,interval=5) 
+    # and you can send a string if needed too
+    k.type_string('o World!')
+    
+
+and it supports a wide range of special keys.
 
     #Create an Alt+Tab combo
     k.press_key(k.alt_key)
