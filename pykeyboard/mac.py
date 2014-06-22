@@ -14,7 +14,7 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
-from Quartz import *
+import Quartz
 from AppKit import NSEvent
 from .base import PyKeyboardMeta, PyKeyboardEventMeta
 
@@ -157,14 +157,14 @@ class PyKeyboard(PyKeyboardMeta):
         try:
             key_code = character_translate_table[key.lower()]
             # kCGEventFlagMaskAlternate | kCGEventFlagMaskCommand | kCGEventFlagMaskControl | kCGEventFlagMaskShift
-            event = CGEventCreateKeyboardEvent(None, key_code, down)
+            event = Quartz.CGEventCreateKeyboardEvent(None, key_code, down)
             mkeyStr = ''
             for mkey in self.modifier_table:
                 if self.modifier_table[mkey]:
                     if len(mkeyStr)>1: mkeyStr = mkeyStr+' ^ '
-                    mkeyStr = mkeyStr+'kCGEventFlagMask'+mkey                    
-            if len(mkeyStr)>1: eval('CGEventSetFlags(event, '+mkeyStr+')')
-            CGEventPost(kCGHIDEventTap, event)
+                    mkeyStr = mkeyStr+'Quartz.kCGEventFlagMask'+mkey                    
+            if len(mkeyStr)>1: eval('Quartz.CGEventSetFlags(event, '+mkeyStr+')')
+            Quartz.CGEventPost(Quartz.kCGHIDEventTap, event)
             if key.lower() == "shift":
               time.sleep(.1)
 
@@ -190,35 +190,35 @@ class PyKeyboard(PyKeyboardMeta):
                 -1 # data2
             )
 
-        CGEventPost(0, ev.CGEvent())
+        Quartz.CGEventPost(0, ev.Quartz.CGEvent())
 
 class PyKeyboardEvent(PyKeyboardEventMeta):
     def run(self):
-        tap = CGEventTapCreate(
-            kCGSessionEventTap,
-            kCGHeadInsertEventTap,
-            kCGEventTapOptionDefault,
-            CGEventMaskBit(kCGEventKeyDown) |
-            CGEventMaskBit(kCGEventKeyUp),
+        tap = Quartz.CGEventTapCreate(
+            Quartz.kCGSessionEventTap,
+            Quartz.kCGHeadInsertEventTap,
+            Quartz.kCGEventTapOptionDefault,
+            Quartz.CGEventMaskBit(Quartz.kCGEventKeyDown) |
+            Quartz.CGEventMaskBit(Quartz.kCGEventKeyUp),
             self.handler,
             None)
 
-        loopsource = CFMachPortCreateRunLoopSource(None, tap, 0)
-        loop = CFRunLoopGetCurrent()
-        CFRunLoopAddSource(loop, loopsource, kCFRunLoopDefaultMode)
-        CGEventTapEnable(tap, True)
+        loopsource = Quartz.CFMachPortCreateRunLoopSource(None, tap, 0)
+        loop = Quartz.CFRunLoopGetCurrent()
+        Quartz.CFRunLoopAddSource(loop, loopsource, Quartz.kCFRunLoopDefaultMode)
+        Quartz.CGEventTapEnable(tap, True)
 
         while self.state:
-            CFRunLoopRunInMode(kCFRunLoopDefaultMode, 5, False)
+            Quartz.CFRunLoopRunInMode(Quartz.kCFRunLoopDefaultMode, 5, False)
 
     def handler(self, proxy, type, event, refcon):
-        key = CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode)
-        if type == kCGEventKeyDown:
+        key = Quartz.CGEventGetIntegerValueField(event, Quartz.kCGKeyboardEventKeycode)
+        if type == Quartz.kCGEventKeyDown:
             self.key_press(key)
-        elif type == kCGEventKeyUp:
+        elif type == Quartz.kCGEventKeyUp:
             self.key_release(key)
 
         if self.capture:
-            CGEventSetType(event, kCGEventNull)
+            Quartz.CGEventSetType(event, Quartz.kCGEventNull)
 
         return event
