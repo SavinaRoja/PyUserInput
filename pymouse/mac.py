@@ -56,7 +56,7 @@ class PyMouse(PyMouseMeta):
 
     def scroll(self, vertical=None, horizontal=None, depth=None):
         #Local submethod for generating Mac scroll events in one axis at a time
-        def scroll_event(y_move=None, x_move=None, z_move=None, n=1):
+        def scroll_event(y_move=0, x_move=0, z_move=0, n=1):
             for _ in range(abs(n)):
                 scrollWheelEvent = Quartz.CGEventCreateScrollWheelEvent(
                     None,  # No source
@@ -73,25 +73,25 @@ class PyMouse(PyMouseMeta):
             if vertical == 0:   # Do nothing with 0 distance
                 pass
             elif vertical > 0:  # Scroll up if positive
-                scroll_event(y_movement=1, n=vertical)
+                scroll_event(y_move=1, n=vertical)
             else:  # Scroll down if negative
-                scroll_event(y_movement=-1, n=abs(vertical))
+                scroll_event(y_move=-1, n=abs(vertical))
         if horizontal is not None:
             horizontal = int(horizontal)
             if horizontal == 0:  # Do nothing with 0 distance
                 pass
             elif horizontal > 0:  # Scroll right if positive
-                scroll_event(x_movement=1, n=horizontal)
+                scroll_event(x_move=1, n=horizontal)
             else:  # Scroll left if negative
-                scroll_event(x_movement=-1, n=abs(horizontal))
+                scroll_event(x_move=-1, n=abs(horizontal))
         if depth is not None:
             depth = int(depth)
             if depth == 0:  # Do nothing with 0 distance
                 pass
             elif vertical > 0:  # Scroll "out" if positive
-                scroll_event(z_movement=1, n=depth)
+                scroll_event(z_move=1, n=depth)
             else:  # Scroll "in" if negative
-                scroll_event(z_movement=-1, n=abs(depth))
+                scroll_event(z_move=-1, n=abs(depth))
 
 
 class PyMouseEvent(PyMouseEventMeta):
