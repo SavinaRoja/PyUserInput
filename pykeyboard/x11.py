@@ -189,7 +189,7 @@ class PyKeyboard(PyKeyboardMeta):
                   'Page_Down', 'End', 'Begin', 'Insert', 'Delete', 'Equal',
                   'Multiply', 'Add', 'Separator', 'Subtract', 'Decimal',
                   'Divide', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-        self.keypad_keys = {k: self.lookup_character_keycode('KP_'+str(k)) for k in keypad}
+        self.keypad_keys = dict((k, self.lookup_character_keycode('KP_'+str(k))) for k in keypad)
         self.numpad_keys = self.keypad_keys
         #Function Keys/ Auxilliary Keys
         #FKeys
