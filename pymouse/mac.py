@@ -14,7 +14,7 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import Quartz
-from AppKit import NSEvent
+from AppKit import NSEvent, NSScreen
 from .base import PyMouseMeta, PyMouseEventMeta
 
 pressID = [None, Quartz.kCGEventLeftMouseDown,
@@ -52,7 +52,8 @@ class PyMouse(PyMouseMeta):
         return loc.x, Quartz.CGDisplayPixelsHigh(0) - loc.y
 
     def screen_size(self):
-        return Quartz.CGDisplayPixelsWide(0), Quartz.CGDisplayPixelsHigh(0)
+        #return Quartz.CGDisplayPixelsWide(0), Quartz.CGDisplayPixelsHigh(0)
+        return NSScreen.mainScreen().frame().size.width, NSScreen.mainScreen().frame().size.height
 
     def scroll(self, vertical=None, horizontal=None, depth=None):
         #Local submethod for generating Mac scroll events in one axis at a time
