@@ -269,7 +269,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         """Begin listening for keyboard input events."""
         self.state = True
         if self.capture:
-            self.display2.screen().root.grab_keyboard(True, X.KeyPressMask | X.KeyReleaseMask, X.GrabModeAsync, X.GrabModeAsync, 0, 0, X.CurrentTime)
+            self.display2.screen().root.grab_keyboard(X.KeyPressMask | X.KeyReleaseMask, X.GrabModeAsync, X.GrabModeAsync, X.CurrentTime)
 
         self.display2.record_enable_context(self.ctx, self.handler)
         self.display2.record_free_context(self.ctx)
