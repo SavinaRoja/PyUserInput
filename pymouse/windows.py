@@ -112,6 +112,7 @@ class PyMouseEvent(PyMouseEventMeta):
 
         if event.Message == pyHook.HookConstants.WM_MOUSEMOVE:
             self.move(x,y)
+            return not self.capture_move
 
         elif event.Message == pyHook.HookConstants.WM_LBUTTONDOWN:
             self.click(x, y, 1, True)
