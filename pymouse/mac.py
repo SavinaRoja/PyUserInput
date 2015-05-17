@@ -32,6 +32,21 @@ class PyMouse(PyMouseMeta):
                                         button - 1)
         Quartz.CGEventPost(Quartz.kCGHIDEventTap, event)
 
+    def doubleclick(self, x, y, button=1):
+        event = CGEventCreateMouseEvent(None,
+                                        pressID[button],
+                                        (x, y),
+                                        button - 1)
+    
+        CGEventSetIntegerValueField(event, kCGMouseEventClickState, 2)
+        CGEventPost(kCGHIDEventTap, event)
+        CGEventSetType(event, kCGEventLeftMouseUp)
+        CGEventPost(kCGHIDEventTap, event)
+        CGEventSetType(event, kCGEventLeftMouseDown)
+        CGEventPost(kCGHIDEventTap, event)
+        CGEventSetType(event, kCGEventLeftMouseUp)
+        CGEventPost(kCGHIDEventTap, event)
+
     def release(self, x, y, button=1):
         event = Quartz.CGEventCreateMouseEvent(None,
                                         releaseID[button],
