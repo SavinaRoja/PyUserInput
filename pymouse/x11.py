@@ -23,15 +23,23 @@ from .base import PyMouseMeta, PyMouseEventMeta, ScrollSupportError
 
 
 def translate_button_code(button):
-    #In X11, the button numbers are: leftclick=1, middleclick=2,
-    #  rightclick=3, scrollup=4, scrolldown=5, scrollleft=6,
-    #  scrollright=7
+    # In X11, the button numbers are:
+    #  leftclick=1, middleclick=2, rightclick=3
     #  For the purposes of the cross-platform interface of PyMouse, we
     #  invert the button number values of the right and middle buttons
     if button in [1, 2, 3]:
         return (None, 1, 3, 2)[button]
     else:
         return button
+
+def button_code_to_scroll_direction(button):
+    # scrollup=4, scrolldown=5, scrollleft=6, scrollright=7
+    return {
+        4: (1, 0),
+        5: (-1, 0),
+        6: (0, 1),
+        7: (0, -1),
+    }[button]
 
 
 class PyMouse(PyMouseMeta):
@@ -159,7 +167,9 @@ class PyMouseEvent(PyMouseEventMeta):
         while len(data):
             event, data = rq.EventField(None).parse_binary_value(data, self.display.display, None, None)
 
-            if event.type == X.ButtonPress:
+            if event.type == X.ButtonPress and event.detail in [4, 5, 6, 7]:
+                self.scroll(event.root_x, event.root_y, *button_code_to_scroll_direction(event.detail))
+            elif event.type == X.ButtonPress:
                 self.click(event.root_x, event.root_y, translate_button_code(event.detail), True)
             elif event.type == X.ButtonRelease:
                 self.click(event.root_x, event.root_y, translate_button_code(event.detail), False)
