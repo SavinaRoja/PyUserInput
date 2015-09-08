@@ -167,8 +167,9 @@ class PyMouseEvent(PyMouseEventMeta):
         while len(data):
             event, data = rq.EventField(None).parse_binary_value(data, self.display.display, None, None)
 
-            if event.type == X.ButtonPress and event.detail in [4, 5, 6, 7]:
-                self.scroll(event.root_x, event.root_y, *button_code_to_scroll_direction(event.detail))
+            if event.detail in [4, 5, 6, 7]:
+                if event.type == X.ButtonPress:
+                    self.scroll(event.root_x, event.root_y, *button_code_to_scroll_direction(event.detail))
             elif event.type == X.ButtonPress:
                 self.click(event.root_x, event.root_y, translate_button_code(event.detail), True)
             elif event.type == X.ButtonRelease:
