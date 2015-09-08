@@ -126,9 +126,9 @@ class PyMouseEvent(PyMouseEventMeta):
             self.click(x, y, 3, True)
         elif event.Message == pyHook.HookConstants.WM_MBUTTONUP:
             self.click(x, y, 3, False)
-            
+
         elif event.Message == pyHook.HookConstants.WM_MOUSEWHEEL:
             # event.Wheel is -1 when scrolling down, 1 when scrolling up
-            self.scroll(x,y,event.Wheel)
-        
+            self.scroll(x, y, event.Wheel, 0)
+
         return not self.capture
