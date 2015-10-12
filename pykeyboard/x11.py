@@ -229,7 +229,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
     The PyKeyboardEvent implementation for X11 systems (mostly linux). This
     allows one to listen for keyboard input.
     """
-    def __init__(self, display=None):
+    def __init__(self, capture=False, display=None):
         self.display = Display(display)
         self.display2 = Display(display)
         self.ctx = self.display2.record_create_context(
@@ -263,7 +263,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         #for i in range(len(self.display._keymap_codes)):
         #    print('{0}: {1}'.format(i, self.display._keymap_codes[i]))
 
-        PyKeyboardEventMeta.__init__(self)
+        PyKeyboardEventMeta.__init__(self, capture)
 
     def run(self):
         """Begin listening for keyboard input events."""
