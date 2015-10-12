@@ -19,6 +19,7 @@ from Xlib.ext.xtest import fake_input
 from Xlib.ext import record
 from Xlib.protocol import rq
 import Xlib.XK
+import Xlib.keysymdef.xkb
 
 from .base import PyKeyboardMeta, PyKeyboardEventMeta
 
@@ -27,45 +28,8 @@ import string
 
 from pymouse.x11 import display_manager
 
-special_X_keysyms = {
-    ' ': "space",
-    '\t': "Tab",
-    '\n': "Return",  # for some reason this needs to be cr, not lf
-    '\r': "Return",
-    '\e': "Escape",
-    '!': "exclam",
-    '#': "numbersign",
-    '%': "percent",
-    '$': "dollar",
-    '&': "ampersand",
-    '"': "quotedbl",
-    '\'': "apostrophe",
-    '(': "parenleft",
-    ')': "parenright",
-    '*': "asterisk",
-    '=': "equal",
-    '+': "plus",
-    ',': "comma",
-    '-': "minus",
-    '.': "period",
-    '/': "slash",
-    ':': "colon",
-    ';': "semicolon",
-    '<': "less",
-    '>': "greater",
-    '?': "question",
-    '@': "at",
-    '[': "bracketleft",
-    ']': "bracketright",
-    '\\': "backslash",
-    '^': "asciicircum",
-    '_': "underscore",
-    '`': "grave",
-    '{': "braceleft",
-    '|': "bar",
-    '}': "braceright",
-    '~': "asciitilde"
-    }
+from .x11_keysyms import KEYSYMS
+
 
 class PyKeyboard(PyKeyboardMeta):
     """
@@ -224,8 +188,13 @@ class PyKeyboard(PyKeyboardMeta):
         for that keysym.
         """
         keysym = Xlib.XK.string_to_keysym(character)
-        if keysym == 0:
-            keysym = Xlib.XK.string_to_keysym(special_X_keysyms[character])
+        if not keysym:
+            try:
+                keysym = getattr(Xlib.keysymdef.xkb, 'XK_' + character, 0)
+            except:
+                keysym = 0
+        if not keysym:
+            keysym = Xlib.XK.string_to_keysym(KEYSYMS[character])
         return self.display.keysym_to_keycode(keysym)
 
 
@@ -487,7 +456,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         """
         keysym = self.string_to_keysym.get(character, 0)
         if keysym == 0:
-            keysym = self.string_to_keysym.get(special_X_keysyms[character], 0)
+            keysym = self.string_to_keysym.get(KEYSYMS[character], 0)
         return self.display.keysym_to_keycode(keysym)
 
     def get_translation_dicts(self):
