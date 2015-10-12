@@ -80,13 +80,15 @@ class PyMouse(PyMouseMeta):
 
     def press(self, x, y, button=1):
         self.move(x, y)
-        fake_input(self.display, X.ButtonPress, translate_button_code(button))
-        self.display.sync()
+
+        with display_manager(self.display) as d:
+            fake_input(d, X.ButtonPress, translate_button_code(button))
 
     def release(self, x, y, button=1):
         self.move(x, y)
-        fake_input(self.display, X.ButtonRelease, translate_button_code(button))
-        self.display.sync()
+
+        with display_manager(self.display) as d:
+            fake_input(d, X.ButtonRelease, translate_button_code(button))
 
     def scroll(self, vertical=None, horizontal=None, depth=None):
         #Xlib supports only vertical and horizontal scrolling
@@ -114,14 +116,14 @@ in X11. This feature is only available on Mac.')
 
     def move(self, x, y):
         if (x, y) != self.position():
-            fake_input(self.display, X.MotionNotify, x=x, y=y)
-            self.display.sync()
+            with display_manager(self.display) as d:
+                fake_input(d, X.MotionNotify, x=x, y=y)
 
     def drag(self, x, y):
-        fake_input(self.display, X.ButtonPress, 1)
-        fake_input(self.display, X.MotionNotify, x=x, y=y)
-        fake_input(self.display, X.ButtonRelease, 1)
-        self.display.sync()
+        with display_manager(self.display) as d:
+            fake_input(d, X.ButtonPress, 1)
+            fake_input(d, X.MotionNotify, x=x, y=y)
+            fake_input(d, X.ButtonRelease, 1)
 
     def position(self):
         coord = self.display.screen().root.query_pointer()._data
