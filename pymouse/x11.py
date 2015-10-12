@@ -22,6 +22,44 @@ from Xlib.protocol import rq
 from .base import PyMouseMeta, PyMouseEventMeta, ScrollSupportError
 
 
+class X11Error(Exception):
+    """An error that is thrown at the end of a code block managed by a
+    :func:`display_manager` if an *X11* error occurred.
+    """
+    pass
+
+
+def display_manager(display):
+    """Traps *X* errors and raises an :class:``X11Error`` at the end if any
+    error occurred.
+
+    This handler also ensures that the :class:`Xlib.display.Display` being
+    managed is sync'd.
+
+    :param Xlib.display.Display display: The *X* display.
+
+    :return: the display
+    :rtype: Xlib.display.Display
+    """
+    from contextlib import contextmanager
+
+    @contextmanager
+    def manager():
+        errors = []
+
+        def handler(*args):
+            errors.append(args)
+
+        old_handler = display.set_error_handler(handler)
+        yield display
+        display.sync()
+        display.set_error_handler(old_handler)
+        if errors:
+            raise X11Error(errors)
+
+    return manager()
+
+
 def translate_button_code(button):
     #In X11, the button numbers are: leftclick=1, middleclick=2,
     #  rightclick=3, scrollup=4, scrolldown=5, scrollleft=6,
