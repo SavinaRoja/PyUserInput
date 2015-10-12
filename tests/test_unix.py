@@ -44,14 +44,14 @@ positions = [
 
 class Event(PyMouseEvent):
     def move(self, x, y):
-        print "Mouse moved to", x, y
+        print("Mouse moved to", x, y)
         self.pos = (x, y)
 
     def click(self, x, y, button, press):
         if press:
-            print "Mouse pressed at", x, y, "with button", button
+            print("Mouse pressed at", x, y, "with button", button)
         else:
-            print "Mouse released at", x, y, "with button", button
+            print("Mouse released at", x, y, "with button", button)
 
 def expect_pos(pos, size):
     def expect(x, m):
@@ -87,6 +87,6 @@ class Test(TestCase):
                     event.pos = None
                     mouse.move(*p)
                     time.sleep(0.1)  # TODO: how long should we wait?
-                    print 'check ', expect_pos(p, size), '=', event.pos
+                    print('check ', expect_pos(p, size), '=', event.pos)
                     eq_(expect_pos(p, size), event.pos)
                 event.stop()                
