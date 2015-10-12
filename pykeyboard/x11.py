@@ -19,6 +19,7 @@ from Xlib.ext.xtest import fake_input
 from Xlib.ext import record
 from Xlib.protocol import rq
 import Xlib.XK
+import Xlib.keysymdef.xkb
 
 from .base import PyKeyboardMeta, PyKeyboardEventMeta
 
@@ -224,7 +225,12 @@ class PyKeyboard(PyKeyboardMeta):
         for that keysym.
         """
         keysym = Xlib.XK.string_to_keysym(character)
-        if keysym == 0:
+        if not keysym:
+            try:
+                keysym = getattr(Xlib.keysymdef.xkb, 'XK_' + character, 0)
+            except:
+                keysym = 0
+        if not keysym:
             keysym = Xlib.XK.string_to_keysym(special_X_keysyms[character])
         return self.display.keysym_to_keycode(keysym)
 
