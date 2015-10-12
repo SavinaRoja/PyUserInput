@@ -195,12 +195,12 @@ class PyMouseEvent(PyMouseEventMeta):
 
     def stop(self):
         self.state = False
-        self.display.ungrab_pointer(X.CurrentTime)
-        self.display.record_disable_context(self.ctx)
-        self.display.flush()
-        self.display2.ungrab_pointer(X.CurrentTime)
-        self.display2.record_disable_context(self.ctx)
-        self.display2.flush()
+        with display_manager(self.display) as d:
+            d.ungrab_pointer(X.CurrentTime)
+            d.record_disable_context(self.ctx)
+        with display_manager(self.display2) as d:
+            d.ungrab_pointer(X.CurrentTime)
+            d.record_disable_context(self.ctx)
 
     def handler(self, reply):
         data = reply.data
