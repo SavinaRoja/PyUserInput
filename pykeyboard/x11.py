@@ -282,12 +282,12 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
     def stop(self):
         """Stop listening for keyboard input events."""
         self.state = False
-        self.display.record_disable_context(self.ctx)
-        self.display.ungrab_keyboard(X.CurrentTime)
-        self.display.flush()
-        self.display2.record_disable_context(self.ctx)
-        self.display2.ungrab_keyboard(X.CurrentTime)
-        self.display2.flush()
+        with display_manager(self.display) as d:
+            d.record_disable_context(self.ctx)
+            d.ungrab_keyboard(X.CurrentTime)
+        with display_manager(self.display2):
+            d.record_disable_context(self.ctx)
+            d.ungrab_keyboard(X.CurrentTime)
 
     def handler(self, reply):
         """Upper level handler of keyboard events."""
