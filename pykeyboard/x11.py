@@ -25,6 +25,8 @@ from .base import PyKeyboardMeta, PyKeyboardEventMeta
 import time
 import string
 
+from pymouse.x11 import display_manager
+
 special_X_keysyms = {
     ' ': "space",
     '\t': "Tab",
@@ -76,39 +78,42 @@ class PyKeyboard(PyKeyboardMeta):
         self.display2 = Display(display)
         self.special_key_assignment()
 
+    def _handle_key(self, character, event):
+        """Handles either a key press or release, depending on ``event``.
+
+        :param character: The key to handle. See :meth:`press_key` and
+        :meth:`release_key` for information about this parameter.
+
+        :param event: The *Xlib* event. This should be either
+        :attr:`Xlib.X.KeyPress` or :attr:`Xlib.X.KeyRelease`
+        """
+        try:
+            # Detect uppercase or shifted character
+            shifted = self.is_char_shifted(character)
+        except AttributeError:
+            # Handle the case of integer keycode argument
+            with display_manager(self.display) as d:
+                fake_input(d, event, character)
+        else:
+            with display_manager(self.display) as d:
+                if shifted:
+                    fake_input(d, event, self.shift_key)
+                keycode = self.lookup_character_keycode(character)
+                fake_input(d, event, keycode)
+
     def press_key(self, character=''):
         """
         Press a given character key. Also works with character keycodes as
         integers, but not keysyms.
         """
-        try:  # Detect uppercase or shifted character
-            shifted = self.is_char_shifted(character)
-        except AttributeError:  # Handle the case of integer keycode argument
-            fake_input(self.display, X.KeyPress, character)
-            self.display.sync()
-        else:
-            if shifted:
-                fake_input(self.display, X.KeyPress, self.shift_key)
-            keycode = self.lookup_character_keycode(character)
-            fake_input(self.display, X.KeyPress, keycode)
-            self.display.sync()
+        self._handle_key(character, X.KeyPress)
 
     def release_key(self, character=''):
         """
         Release a given character key. Also works with character keycodes as
         integers, but not keysyms.
         """
-        try:  # Detect uppercase or shifted character
-            shifted = self.is_char_shifted(character)
-        except AttributeError:  # Handle the case of integer keycode argument
-            fake_input(self.display, X.KeyRelease, character)
-            self.display.sync()
-        else:
-            if shifted:
-                fake_input(self.display, X.KeyRelease, self.shift_key)
-            keycode = self.lookup_character_keycode(character)
-            fake_input(self.display, X.KeyRelease, keycode)
-            self.display.sync()
+        self._handle_key(character, X.KeyRelease)
 
     def special_key_assignment(self):
         """
