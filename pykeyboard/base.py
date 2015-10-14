@@ -48,7 +48,7 @@ class PyKeyboardMeta(object):
             self.press_key(character)
         for character in characters:
             self.release_key(character)
-    
+
     def type_string(self, char_string, interval=0):
         """
         A convenience method for typing longer strings of characters. Generates
