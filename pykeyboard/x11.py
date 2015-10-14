@@ -107,6 +107,7 @@ class PyKeyboard(PyKeyboardMeta):
         self.shift_key = self.shift_l_key  # Default Shift is left Shift
         self.alt_l_key = self.lookup_character_keycode('Alt_L')
         self.alt_r_key = self.lookup_character_keycode('Alt_R')
+        self.altgr_key = self.lookup_character_keycode('ISO_Level3_Shift')
         self.alt_key = self.alt_l_key  # Default Alt is left Alt
         self.control_l_key = self.lookup_character_keycode('Control_L')
         self.control_r_key = self.lookup_character_keycode('Control_R')
