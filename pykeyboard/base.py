@@ -26,6 +26,8 @@ class PyKeyboardMeta(object):
     """
     The base class for PyKeyboard. Represents basic operational model.
     """
+    #: We add this named character for convenience
+    space = ' '
 
     def press_key(self, character=''):
         """Press a given character key."""
