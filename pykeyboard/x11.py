@@ -19,51 +19,17 @@ from Xlib.ext.xtest import fake_input
 from Xlib.ext import record
 from Xlib.protocol import rq
 import Xlib.XK
+import Xlib.keysymdef.xkb
 
 from .base import PyKeyboardMeta, PyKeyboardEventMeta
 
 import time
 import string
 
-special_X_keysyms = {
-    ' ': "space",
-    '\t': "Tab",
-    '\n': "Return",  # for some reason this needs to be cr, not lf
-    '\r': "Return",
-    '\e': "Escape",
-    '!': "exclam",
-    '#': "numbersign",
-    '%': "percent",
-    '$': "dollar",
-    '&': "ampersand",
-    '"': "quotedbl",
-    '\'': "apostrophe",
-    '(': "parenleft",
-    ')': "parenright",
-    '*': "asterisk",
-    '=': "equal",
-    '+': "plus",
-    ',': "comma",
-    '-': "minus",
-    '.': "period",
-    '/': "slash",
-    ':': "colon",
-    ';': "semicolon",
-    '<': "less",
-    '>': "greater",
-    '?': "question",
-    '@': "at",
-    '[': "bracketleft",
-    ']': "bracketright",
-    '\\': "backslash",
-    '^': "asciicircum",
-    '_': "underscore",
-    '`': "grave",
-    '{': "braceleft",
-    '|': "bar",
-    '}': "braceright",
-    '~': "asciitilde"
-    }
+from pymouse.x11 import display_manager
+
+from .x11_keysyms import KEYSYMS
+
 
 class PyKeyboard(PyKeyboardMeta):
     """
@@ -76,39 +42,42 @@ class PyKeyboard(PyKeyboardMeta):
         self.display2 = Display(display)
         self.special_key_assignment()
 
+    def _handle_key(self, character, event):
+        """Handles either a key press or release, depending on ``event``.
+
+        :param character: The key to handle. See :meth:`press_key` and
+        :meth:`release_key` for information about this parameter.
+
+        :param event: The *Xlib* event. This should be either
+        :attr:`Xlib.X.KeyPress` or :attr:`Xlib.X.KeyRelease`
+        """
+        try:
+            # Detect uppercase or shifted character
+            shifted = self.is_char_shifted(character)
+        except AttributeError:
+            # Handle the case of integer keycode argument
+            with display_manager(self.display) as d:
+                fake_input(d, event, character)
+        else:
+            with display_manager(self.display) as d:
+                if shifted:
+                    fake_input(d, event, self.shift_key)
+                keycode = self.lookup_character_keycode(character)
+                fake_input(d, event, keycode)
+
     def press_key(self, character=''):
         """
         Press a given character key. Also works with character keycodes as
         integers, but not keysyms.
         """
-        try:  # Detect uppercase or shifted character
-            shifted = self.is_char_shifted(character)
-        except AttributeError:  # Handle the case of integer keycode argument
-            fake_input(self.display, X.KeyPress, character)
-            self.display.sync()
-        else:
-            if shifted:
-                fake_input(self.display, X.KeyPress, self.shift_key)
-            keycode = self.lookup_character_keycode(character)
-            fake_input(self.display, X.KeyPress, keycode)
-            self.display.sync()
+        self._handle_key(character, X.KeyPress)
 
     def release_key(self, character=''):
         """
         Release a given character key. Also works with character keycodes as
         integers, but not keysyms.
         """
-        try:  # Detect uppercase or shifted character
-            shifted = self.is_char_shifted(character)
-        except AttributeError:  # Handle the case of integer keycode argument
-            fake_input(self.display, X.KeyRelease, character)
-            self.display.sync()
-        else:
-            if shifted:
-                fake_input(self.display, X.KeyRelease, self.shift_key)
-            keycode = self.lookup_character_keycode(character)
-            fake_input(self.display, X.KeyRelease, keycode)
-            self.display.sync()
+        self._handle_key(character, X.KeyRelease)
 
     def special_key_assignment(self):
         """
@@ -138,6 +107,7 @@ class PyKeyboard(PyKeyboardMeta):
         self.shift_key = self.shift_l_key  # Default Shift is left Shift
         self.alt_l_key = self.lookup_character_keycode('Alt_L')
         self.alt_r_key = self.lookup_character_keycode('Alt_R')
+        self.altgr_key = self.lookup_character_keycode('ISO_Level3_Shift')
         self.alt_key = self.alt_l_key  # Default Alt is left Alt
         self.control_l_key = self.lookup_character_keycode('Control_L')
         self.control_r_key = self.lookup_character_keycode('Control_R')
@@ -219,8 +189,13 @@ class PyKeyboard(PyKeyboardMeta):
         for that keysym.
         """
         keysym = Xlib.XK.string_to_keysym(character)
-        if keysym == 0:
-            keysym = Xlib.XK.string_to_keysym(special_X_keysyms[character])
+        if not keysym:
+            try:
+                keysym = getattr(Xlib.keysymdef.xkb, 'XK_' + character, 0)
+            except:
+                keysym = 0
+        if not keysym:
+            keysym = Xlib.XK.string_to_keysym(KEYSYMS[character])
         return self.display.keysym_to_keycode(keysym)
 
 
@@ -229,7 +204,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
     The PyKeyboardEvent implementation for X11 systems (mostly linux). This
     allows one to listen for keyboard input.
     """
-    def __init__(self, display=None):
+    def __init__(self, capture=False, display=None):
         self.display = Display(display)
         self.display2 = Display(display)
         self.ctx = self.display2.record_create_context(
@@ -263,13 +238,13 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         #for i in range(len(self.display._keymap_codes)):
         #    print('{0}: {1}'.format(i, self.display._keymap_codes[i]))
 
-        PyKeyboardEventMeta.__init__(self)
+        PyKeyboardEventMeta.__init__(self, capture)
 
     def run(self):
         """Begin listening for keyboard input events."""
         self.state = True
         if self.capture:
-            self.display2.screen().root.grab_keyboard(True, X.KeyPressMask | X.KeyReleaseMask, X.GrabModeAsync, X.GrabModeAsync, 0, 0, X.CurrentTime)
+            self.display2.screen().root.grab_keyboard(X.KeyPressMask | X.KeyReleaseMask, X.GrabModeAsync, X.GrabModeAsync, X.CurrentTime)
 
         self.display2.record_enable_context(self.ctx, self.handler)
         self.display2.record_free_context(self.ctx)
@@ -277,12 +252,12 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
     def stop(self):
         """Stop listening for keyboard input events."""
         self.state = False
-        self.display.record_disable_context(self.ctx)
-        self.display.ungrab_keyboard(X.CurrentTime)
-        self.display.flush()
-        self.display2.record_disable_context(self.ctx)
-        self.display2.ungrab_keyboard(X.CurrentTime)
-        self.display2.flush()
+        with display_manager(self.display) as d:
+            d.record_disable_context(self.ctx)
+            d.ungrab_keyboard(X.CurrentTime)
+        with display_manager(self.display2):
+            d.record_disable_context(self.ctx)
+            d.ungrab_keyboard(X.CurrentTime)
 
     def handler(self, reply):
         """Upper level handler of keyboard events."""
@@ -482,7 +457,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
         """
         keysym = self.string_to_keysym.get(character, 0)
         if keysym == 0:
-            keysym = self.string_to_keysym.get(special_X_keysyms[character], 0)
+            keysym = self.string_to_keysym.get(KEYSYMS[character], 0)
         return self.display.keysym_to_keycode(keysym)
 
     def get_translation_dicts(self):
