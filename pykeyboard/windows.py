@@ -90,6 +90,7 @@ class PyKeyboard(PyKeyboardMeta):
         self.menu_key = VK_MENU
         self.alt_l_key = VK_LMENU
         self.alt_r_key = VK_RMENU
+        self.altgr_key = VK_RMENU
         self.alt_key = self.alt_l_key
         self.pause_key = VK_PAUSE
         self.caps_lock_key = VK_CAPITAL
