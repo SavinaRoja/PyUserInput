@@ -122,3 +122,11 @@ class PyMouseEventMeta(Thread):
     def move(self, x, y):
         """Subclass this method with your move event handler"""
         pass
+
+    def scroll(self, x, y, vertical, horizontal):
+        """
+        Subclass this method with your scroll event handler
+            Vertical: + Up, - Down
+            Horizontal: + Right, - Left
+        """
+        pass
