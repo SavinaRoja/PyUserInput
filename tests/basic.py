@@ -37,12 +37,12 @@ except ImportError:
 
 m = PyMouse()
 try:
-	size = m.screen_size()
-	print("size: %s" % (str(size)))
+    size = m.screen_size()
+    print("size: %s" % (str(size)))
 
-	pos = (random.randint(0, size[0]), random.randint(0, size[1]))
+    pos = (random.randint(0, size[0]), random.randint(0, size[1]))
 except:
-	pos = (random.randint(0, 250), random.randint(0, 250))
+    pos = (random.randint(0, 250), random.randint(0, 250))
 
 print("Position: %s" % (str(pos)))
 
