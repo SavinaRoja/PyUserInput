@@ -1,6 +1,12 @@
 PyUserInput
 ===========
 
+**PyUserInput is a group project so we've moved the project over to a group
+organization: https://github.com/PyUserInput/PyUserInput . That is now the
+active development repository and I'll be phasing this one out, so please go
+there for the latest code and to post new issues. This should be corrected on
+PyPI in the next version update of PyUserInput.**
+
 A module for cross-platform control of the mouse and keyboard in python that is
 simple to use.
 
