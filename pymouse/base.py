@@ -22,6 +22,8 @@ framework to be extended by each platform.
 """
 
 from threading import Thread
+import time
+import numpy as np
 
 
 class ScrollSupportError(Exception):
@@ -54,6 +56,7 @@ class PyMouseMeta(object):
 
         for i in range(n):
             self.press(x, y, button)
+            time.sleep(np.random.uniform(0.2, 0.3, 1)[0])
             self.release(x, y, button)
 
     def scroll(self, vertical=None, horizontal=None, depth=None):
