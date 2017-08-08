@@ -20,8 +20,8 @@ import pythoncom
 from time import sleep
 
 class POINT(Structure):
-    _fields_ = [("x", c_ulong),
-                ("y", c_ulong)]
+    _fields_ = [("x", c_long),
+                ("y", c_long)]
 
 class PyMouse(PyMouseMeta):
     """MOUSEEVENTF_(button and action) constants
