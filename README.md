@@ -1,5 +1,5 @@
 PyUserInput
-===========
+=====================================
 
 **PyUserInput is a group project so we've moved the project over to a group
 organization: https://github.com/PyUserInput/PyUserInput . That is now the
