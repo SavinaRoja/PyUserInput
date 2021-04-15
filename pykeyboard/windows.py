@@ -229,7 +229,7 @@ class PyKeyboardEvent(PyKeyboardEventMeta):
     def __init__(self, diagnostic=False):
         self.diagnostic = diagnostic
 
-        import pyHook
+        import pyWinhook as pyHook
 
         PyKeyboardEventMeta.__init__(self)
         self.hm = pyHook.HookManager()
