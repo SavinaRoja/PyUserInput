@@ -13,7 +13,7 @@ def long_description():
     return(readme_text)
 
 setup(name='PyUserInput',
-      version='0.1.9',
+      version='0.1.10',
       description='A simple, cross-platform module for mouse and keyboard control',
       long_description=long_description(),
       author='Paul Barton',
@@ -37,6 +37,6 @@ def dependency_check(dep_list):
 if sys.platform == 'darwin':  # Mac
     dependency_check(['Quartz', 'AppKit'])
 elif sys.platform == 'win32':  # Windows
-    dependency_check(['win32api', 'win32con', 'pythoncom', 'pyHook'])
+    dependency_check(['win32api', 'win32con', 'pythoncom', 'pyWinhook'])
 else:  # X11 (LInux)
     dependency_check(['Xlib'])
